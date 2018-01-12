@@ -1,0 +1,23 @@
+{
+  "name": "icorating-api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nodemon server.js",
+    "build": "pm2 start server.js"
+  },
+  "dependencies": {
+    "axios": "^0.17.1",
+    "body-parser": "~1.18.2",
+    "dotenv": "^4.0.0",
+    "ejs": "^2.5.7",
+    "express": "~4.15.5",
+    "mysql": "^2.15.0",
+    "orm": "^4.0.2",
+    "tress": "^1.0.5",
+    "winston": "^2.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.13.3"
+  }
+}

@@ -1,1 +1,1 @@
-# icorating-api
+# icorating API
