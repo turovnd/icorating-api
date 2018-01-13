@@ -19,10 +19,10 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Структура таблицы `Project`
+-- Структура таблицы `project`
 --
 
-CREATE TABLE `Project` (
+CREATE TABLE `project` (
   `id` int(11) NOT NULL,
   `name` text NOT NULL,
   `ticker` text NOT NULL,
@@ -39,9 +39,9 @@ CREATE TABLE `Project` (
 --
 
 --
--- Индексы таблицы `Project`
+-- Индексы таблицы `project`
 --
-ALTER TABLE `Project`
+ALTER TABLE `project`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -49,9 +49,9 @@ ALTER TABLE `Project`
 --
 
 --
--- AUTO_INCREMENT для таблицы `Project`
+-- AUTO_INCREMENT для таблицы `project`
 --
-ALTER TABLE `Project`
+ALTER TABLE `project`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
