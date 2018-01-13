@@ -71,25 +71,22 @@ router.put('/project/:id', (req, res, next) => {
             project.name      = req.body.name;
             project.ticker    = req.body.ticker;
             project.wallets   = req.body.wallets;
-            project.priceBTC  = req.body.priceBTC !== undefined ? req.body.priceBTC : project.priceBTC;
-            project.priceETH  = req.body.priceETH !== undefined ? req.body.priceETH : project.priceETH;
-            project.priceUSD  = req.body.priceUSD !== undefined ? req.body.priceUSD : project.priceUSD;
-            project.dt_update = new Date();
-
-            project.save((err, project1) => {
-                if (err) {
-                    res.json({
-                        status: 0,
-                        message: "Error occurred on updating project `id=" + req.params.id + "`: " + (project === null ? "not found" : err)
-                    })
-                } else {
-                    res.json({
-                        status: 1,
-                        data: project1,
-                        message: "Update successfully"
-                    })
-                }
-            })
+            Projects.updateBalances(project, function (project1) {
+                project1.save((error, project2) => {
+                    if (error) {
+                        res.json({
+                            status: 0,
+                            message: "Error occurred on updating project `id=" + req.params.id + "`: " + (project === null ? "not found" : err)
+                        })
+                    } else {
+                        res.json({
+                            status: 1,
+                            data: project2,
+                            message: "Update successfully"
+                        })
+                    }
+                })
+            });
         }
     });
 });

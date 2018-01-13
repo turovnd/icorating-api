@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Янв 13 2018 г., 00:39
+-- Время создания: Янв 13 2018 г., 15:34
 -- Версия сервера: 5.6.34
 -- Версия PHP: 5.6.29
 
@@ -12,11 +12,11 @@ SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
-
 
 --
 -- Структура таблицы `Project`
@@ -27,9 +27,9 @@ CREATE TABLE `Project` (
   `name` text NOT NULL,
   `ticker` text NOT NULL,
   `wallets` text NOT NULL,
-  `priceBTC` float DEFAULT NULL,
-  `priceETH` float DEFAULT NULL,
-  `priceUSD` float DEFAULT NULL,
+  `priceBTC` double DEFAULT NULL,
+  `priceETH` double DEFAULT NULL,
+  `priceUSD` double DEFAULT NULL,
   `dt_update` datetime DEFAULT NULL,
   `dt_create` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
