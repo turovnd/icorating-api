@@ -32,7 +32,7 @@ let getProjects_ = function (callback) {
         })
         .catch(function (error) {
             logger.error("Error occurred on getting projects: " + error);
-            setTimeout(getProjects_, 5000);
+            setTimeout(function() { getProjects_(callback); }, 5000);
         });
 };
 
@@ -51,7 +51,7 @@ let getCourse_ = function (callback) {
     Exchanges.poloniex(function (error, object) {
         if (error) {
             logger.error("Error occurred on getting poloniex course: " + error);
-            getCourse_(callback);
+            setTimeout(function () { getCourse_(callback); }, 3000);
         } else {
             callback(object);
         }
