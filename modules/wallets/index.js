@@ -130,7 +130,7 @@ let updateBalances_ = function (project, callback) {
         } else {
             if (projects.length > 0) {
                 for (let i in projects) {
-                    updateBalance_(projects[i], updateProject_, course);
+                    updateBalance_(projects[i], function () { updateProject_(projects[i]) }, course);
                 }
             }
         }
