@@ -50,6 +50,7 @@ module.exports = function (address, callback) {
                 } else {
                     // get last transaction from DB
                     let timeStamp = transactions[0].get('timeStamp'),
+                        newTransactions = [],
                         flag = true;
 
                     totalValue = transactions[0].get('totalValue');
@@ -59,18 +60,23 @@ module.exports = function (address, callback) {
                         if (parseInt(current.timeStamp) === parseInt(timeStamp)) {
                             flag = false;
                         } else {
-                            currentValue = parseFloat(current.value) / 1000000000000000000;
-                            totalValue += currentValue;
-                            insertArray.push({
-                                address: address,
-                                hash: current.hash,
-                                timeStamp: current.timeStamp,
-                                from: current.from,
-                                to: current.to,
-                                value: currentValue,
-                                totalValue: totalValue
-                            })
+                            newTransactions.push(current);
                         }
+                    }
+
+                    while (newTransactions.length !== 0) {
+                        current = newTransactions.pop();
+                        currentValue = parseFloat(current.value) / 1000000000000000000;
+                        totalValue += currentValue;
+                        insertArray.push({
+                            address: address,
+                            hash: current.hash,
+                            timeStamp: current.timeStamp,
+                            from: current.from,
+                            to: current.to,
+                            value: currentValue,
+                            totalValue: totalValue
+                        })
                     }
                 }
                 models.transactions.bulkCreate(insertArray).then(() => {
