@@ -41,7 +41,7 @@ let updateProject_ = function (project) {
     axios.put(process.env.SITE + ":" + process.env.PORT + '/api/project/' + project.id, project)
         .catch(function (error) {
             logger.error("Error occurred on updating project `id=" + project.id + "`: " + error);
-            setTimeout(function () { updateProject_(project) }, 2000);
+            setTimeout(function () { updateProject_(project) }, 5000);
         });
 };
 
