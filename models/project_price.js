@@ -4,19 +4,19 @@ module.exports = function(sequelize, Sequelize) {
 
     let Model = sequelize.define('projects_prices', {
 
-        project: { // Project ID
+        project_id: { // Project ID
             type: Sequelize.INTEGER
         },
 
-        priceBTC: {
+        price_btc: {
             type: Sequelize.DOUBLE
         },
 
-        priceETH: {
+        price_eth: {
             type: Sequelize.DOUBLE
         },
 
-        priceUSD: {
+        price_usd: {
             type: Sequelize.DOUBLE
         }
 

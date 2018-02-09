@@ -26,7 +26,7 @@ app.use(function (req, res, next) {
 });
 
 // Use Server Side routes for API
-// app.use('/api', require('./routes/projects'));
+app.use('/api', require('./routes/projects'));
 
 app.use('/api', (req, res, next) => {
     res.render('api.html');
@@ -40,9 +40,9 @@ app.use('/', function(req, res, next) {
 
 /** INIT server */
 app.listen(process.env.PORT, () => {
-    logger.info("Server Ready! Site: " + process.env.SITE + ":" + process.env.PORT);
 
     models.sequelize.sync().then(() => {
+        logger.info("Server Ready! Site: " + process.env.SITE + ":" + process.env.PORT);
         const etherscan  = require('./modules/wallets/etherscan');
         etherscan("0x5c7621f7afb14b9ab20fefede40b428d9b4429f2", function (err, object) {
             console.log(err, object);

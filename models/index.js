@@ -3,7 +3,7 @@
 const fs        = require("fs");
 const path      = require("path");
 const Sequelize = require("sequelize");
-const sequelize = new Sequelize("mysql://" + process.env.DB_USER + ":" + process.env.DB_PASSWORD + "@" + process.env.DB_HOST + "/" + process.env.DB_DATABASE, { logging: false });
+const sequelize = new Sequelize("mysql://" + process.env.DB_USER + ":" + process.env.DB_PASSWORD + "@" + process.env.DB_HOST + ":" + process.env.DB_PORT + "/" + process.env.DB_DATABASE, { logging: false });
 
 let db = {};
 

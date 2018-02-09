@@ -29,7 +29,7 @@ module.exports = function (address, callback) {
             // Update Address Transactions
             models.transactions.findAll({
                 where: {address: address},
-                order: [['timeStamp','DESC']]
+                order: [['timestamp','DESC']]
             }).then(transactions => {
                 if (transactions.length === 0) {
                     // save all transaction to DB
@@ -40,20 +40,20 @@ module.exports = function (address, callback) {
                         insertArray.push({
                             address: address,
                             hash: current.hash,
-                            timeStamp: current.timeStamp,
+                            timestamp: current.timeStamp,
                             from: current.from,
                             to: current.to,
                             value: currentValue,
-                            totalValue: totalValue
+                            total_value: totalValue
                         })
                     }
                 } else {
                     // get last transaction from DB
-                    let timeStamp = transactions[0].get('timeStamp'),
+                    let timeStamp = transactions[0].get('timestamp'),
                         newTransactions = [],
                         flag = true;
 
-                    totalValue = transactions[0].get('totalValue');
+                    totalValue = transactions[0].get('total_value');
 
                     while (flag) {
                         current = getTransactions.shift();

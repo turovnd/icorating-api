@@ -26,8 +26,13 @@ module.exports = function(sequelize, Sequelize) {
         }
 
     }, {
+        updatedAt: false,
         freezeTableName: true
     });
+
+    Model.associate = function(models) {
+        models.projects.hasMany(models.projects_prices, { as: "Prices" });
+    };
 
     return Model;
 

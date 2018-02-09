@@ -14,7 +14,7 @@ module.exports = function(sequelize, Sequelize) {
             notEmpty: true
         },
 
-        timeStamp: {
+        timestamp: {
             type: Sequelize.INTEGER,
             notEmpty: true
         },
@@ -31,7 +31,7 @@ module.exports = function(sequelize, Sequelize) {
             type: Sequelize.DOUBLE
         },
 
-        totalValue: {
+        total_value: {
             type: Sequelize.DOUBLE
         },
 
