@@ -1,32 +1,33 @@
-const express = require('express');
-const router  = express.Router();
-let models = require('../models');
-let Projects  = require('./../modules/wallets');
+const express   = require('express');
+const router    = express.Router();
+const models    = require('../models');
+const Projects  = require('./../modules/wallets');
 
 /* GET all projects */
 router.get('/projects', (req, res, next) => {
 
     models.projects.findAll({
-        include: ["Prices"]
+        include: ["Prices"],
+        order: [["created_at", 'DESC']]
     })
         .then(projects => {
 
             const results = projects.map(project => {
 
-                let price = project.getPrices()[project.getPrices().length - 1] || {};
+                let price = project.getDataValue('Prices')[project.getDataValue('Prices').length - 1] || {};
 
                 return Object.assign(
                     {},
                     {
-                        id: project.id,
-                        name: project.name,
-                        ticker: project.ticker,
-                        wallets: project.wallets,
-                        price_btc: price.price_btc,
-                        price_eth: price.price_eth,
-                        price_usd: price.price_usd,
-                        updated_at: price.created_at,
-                        created_at: project.created_at
+                        id:         project.getDataValue('id'),
+                        name:       project.getDataValue('name'),
+                        ticker:     project.getDataValue('ticker'),
+                        wallets:    project.getDataValue('wallets'),
+                        price_btc:  price.getDataValue('price_btc'),
+                        price_eth:  price.getDataValue('price_eth'),
+                        price_usd:  price.getDataValue('price_usd'),
+                        updated_at: price.getDataValue('created_at'),
+                        created_at: project.getDataValue('created_at')
                     }
                 );
             });
@@ -51,22 +52,27 @@ router.post('/project/add', (req, res, next) => {
         })
     }
 
-    models.projects.create({
+    let insertedProject = {
         name        : req.body.name,
         ticker      : req.body.ticker,
         wallets     : req.body.wallets,
-        dt_create   : new Date()
-    })
-        .then(project => {
-            /// TODO add project to updating
+        created_at  : new Date()
+    };
 
-            // Projects.updateProjects("add", project.toJSON());
-            // Projects.updateBalances(project, function (project1) {
-            res.json({
-                status: 1,
-                data: project,
-                message: "Project created successfully"
-            })
+    models.projects.create(insertedProject)
+        .then(async project =>  {
+
+            insertedProject.id = project.getDataValue('id');
+
+            await Projects.updateProjects("add", insertedProject);
+
+            Projects.updateBalance(insertedProject, result => {
+                res.json({
+                    status: 1,
+                    data: result,
+                    message: "Project created successfully"
+                })
+            });
 
         });
 
@@ -77,7 +83,7 @@ router.put('/project/:id', (req, res, next) => {
     models.projects.findOne({
         where: {id: req.params.id}
     })
-        .then(project => {
+        .then(async project => {
             if (project === null) {
                 res.json({
                     status: 0,
@@ -85,16 +91,28 @@ router.put('/project/:id', (req, res, next) => {
                 })
             } else {
                 project.updateAttributes({
-                    name        : req.body.name,
-                    ticker      : req.body.ticker,
-                    wallets     : req.body.wallets
+                    name: req.body.name,
+                    ticker: req.body.ticker,
+                    wallets: req.body.wallets
                 });
-                // TODO    Projects.updateBalances(project, function (project1) {
-                //    TODO изменить объект и отправить
-                res.json({
-                    status: 1,
-                    data: project,
-                    message: "Project updated successfully"
+
+                let newProject = {
+                    id: project.getDataValue('id'),
+                    name: project.getDataValue('name'),
+                    ticker: project.getDataValue('ticker'),
+                    wallets: project.getDataValue('wallets'),
+                    created_at: project.getDataValue('created_at')
+                };
+
+                await Projects.updateProjects("update", newProject);
+
+                Projects.updateBalance(newProject, result => {
+
+                    res.json({
+                        status: 1,
+                        data: result,
+                        message: "Project updated successfully"
+                    })
                 })
             }
 
@@ -113,7 +131,7 @@ router.delete('/project/:id', (req, res, next) => {
                 message: "Project with id=" + req.params.id + " not found"
             })
         } else {
-            // Projects.updateProjects("delete", {id: req.params.id});
+            Projects.updateProjects("delete", {id: req.params.id});
             res.json({
                 status: 1,
                 message: "Project deleted successfully"

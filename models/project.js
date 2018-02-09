@@ -27,7 +27,7 @@ module.exports = function(sequelize, Sequelize) {
 
     }, {
         updatedAt: false,
-        freezeTableName: true
+        underscored: true
     });
 
     Model.associate = function(models) {

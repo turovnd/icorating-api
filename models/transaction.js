@@ -37,10 +37,8 @@ module.exports = function(sequelize, Sequelize) {
 
     }, {
         timestamps: false,
-        freezeTableName: true
+        underscored: true
     });
-
-    Model.removeAttribute('id');
 
     return Model;
 

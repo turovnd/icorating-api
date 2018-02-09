@@ -3,6 +3,7 @@ const express    = require('express');
 const path       = require('path');
 const ejs        = require('ejs');
 const models     = require("./models");
+const wallets    = require("./modules/wallets");
 const bodyParser = require('body-parser');
 const logger     = require('./modules/logger')();
 
@@ -43,10 +44,7 @@ app.listen(process.env.PORT, () => {
 
     models.sequelize.sync().then(() => {
         logger.info("Server Ready! Site: " + process.env.SITE + ":" + process.env.PORT);
-        const etherscan  = require('./modules/wallets/etherscan');
-        etherscan("0x5c7621f7afb14b9ab20fefede40b428d9b4429f2", function (err, object) {
-            console.log(err, object);
-        });
+        wallets.init();
     });
 
 });

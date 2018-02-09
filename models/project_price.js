@@ -22,9 +22,8 @@ module.exports = function(sequelize, Sequelize) {
 
     },{
         updatedAt: false,
+        underscored: true
     });
-
-    Model.removeAttribute('id');
 
     return Model;
 

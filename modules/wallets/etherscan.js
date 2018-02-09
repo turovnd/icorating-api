@@ -4,6 +4,7 @@ const models = require('../../models');
 /**
  * Get transactions by `address` and update them in DB
  * @param address
+ * @param address
  * @param callback
  */
 module.exports = function (address, callback) {
