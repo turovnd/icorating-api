@@ -31,6 +31,9 @@ DB_DATABASE=database_name
 
 API_BLOCKCHAIN=
 API_ETHERSCAN=api_key_from_etherscan.io
+
+ICOBENCH_PUBLIC_KEY=public_key_from_icobench
+ICOBENCH_PRIVATE_KEY=private_key_from_icobench
 ```
 
 - Выполните следующие команды для запуска скрипта:
@@ -38,6 +41,8 @@ API_ETHERSCAN=api_key_from_etherscan.io
 npm install
 npm run build
 ```
+
+- Внесите IP адрес серверев white list на сайте https://icobench.com/developers#manage_api_access
 
 ## Посмотреть состояние скрипта и логи
 - логи об ошибках хранятся в папке `logs`
