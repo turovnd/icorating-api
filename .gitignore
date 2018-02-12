@@ -23,3 +23,7 @@ typings/
 .env
 
 .idea/*
+
+assets/people/*
+!assets/people/no-image.jpg
+package-lock.json

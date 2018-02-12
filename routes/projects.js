@@ -107,7 +107,6 @@ router.put('/project/:id', (req, res, next) => {
                 await Projects.updateProjects("update", newProject);
 
                 Projects.updateBalance(newProject, result => {
-
                     res.json({
                         status: 1,
                         data: result,

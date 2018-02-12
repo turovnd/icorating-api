@@ -1,6 +1,6 @@
 let winston = require('winston');
 let config = winston.config;
-let filePrefix = new Date().getMonth() + "-" + new Date().getFullYear() + "-";
+let filePrefix = (new Date().getMonth() + 1) + "-" + new Date().getFullYear() + "-";
 
 winston.emitErrs = true;
 
