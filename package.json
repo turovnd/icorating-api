@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "pm2 start server.js --name='api'",
+    "build": "pm2 start server.js --name='api'",
+    "start": "pm2 start api",
     "stop": "pm2 stop api"
   },
   "dependencies": {
