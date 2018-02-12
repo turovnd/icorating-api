@@ -2,10 +2,12 @@ require('dotenv').config();
 const express    = require('express');
 const path       = require('path');
 const ejs        = require('ejs');
-const models     = require("./models");
-const wallets    = require("./modules/wallets");
 const bodyParser = require('body-parser');
 const logger     = require('./modules/logger')();
+
+const models     = require("./models");
+const wallets    = require("./modules/wallets");
+const people     = require("./modules/people");
 
 let app = express();
 
@@ -45,6 +47,7 @@ app.listen(process.env.PORT, () => {
     models.sequelize.sync().then(() => {
         logger.info("Server Ready! Site: " + process.env.SITE + ":" + process.env.PORT);
         wallets.init();
+        people.init();
     });
 
 });
