@@ -1,94 +1,144 @@
 'use strict';
-const fs        = require('fs');
-const needle    = require('needle');
-const tress     = require('tress');
-const cheerio   = require('cheerio');
-const logger    = require('../logger')();
 const models    = require('../../models');
-const icoBench  = require('../api/icoBench');
-let scraper = null;
 
-let getAllPeople_ = function () {
+// Array of all ICOs in DB
+let icos = {};
 
-};
 
 /**
- * Initialize scraping function
+ * Get all ICOs from DB
  * @private
  */
-let initScraper_ = function () {
-    scraper = tress((object, callback) => {
-        needle('get', object.url)
-            .then(response => {
-                let $ = cheerio.load(response.body);
+let getAllIcos_ = function () {
 
-                let distribution = $("h3:contains('Rating distribution')").next(),
-                    social = "",
-                    available_for = "",
-                    distribution_rates = $("small:contains('rates')", distribution).parent().text().replace(/[^0-9.]/g, ''),
-                    distribution_average_rate = $("small:contains('average rate')", distribution).parent().text().replace(/[^0-9.]/g, ''),
-                    distribution_weight = $("h3:contains('Weight distribution')").next().find('b').text().trim(),
-                    profile_score = $("label:contains('Profile score')").parent().find('.value').text().split('/')[0],
-                    ratings_score = $("label:contains('Ratings score')").parent().find('.value').text().split('/')[0],
-                    time_score = $("label:contains('Time score')").parent().find('.value').text().split('/')[0],
-                    iss = $("label:contains('ISS')").parent().find('.value').text().split('/')[0],
-                    acceptance_score = $("label:contains('Acceptance score')").parent().find('.value').text().split('/')[0],
-                    contribution_score = $("label:contains('Contribution score')").parent().find('.value').text().split('/')[0]
+    return models.icos.findAll({
+        order: [["created_at", 'DESC']]
+    })
+        .then(allicos => {
 
-                $('.links a').each((i, el) => {
-                   social += $(el).attr('href') + ((i < $('.links a').length - 1) ? "," : "");
-                });
+            return allicos.map(ico => {
 
-                $("h4:contains('Available for')").next().find('.tag').each((i, el) => {
-                    available_for += $(el).text().trim() + ((i < $('.links a').length - 1) ? "," : "");
-                });
+                icos[parseInt(ico.getDataValue('id'))] = Object.assign(
+                    {},
+                    {
+                        id:             ico.getDataValue('id'),
+                        name:           ico.getDataValue('name'),
+                        telegram:       ico.getDataValue('telegram'),
+                        bitcointalk:    ico.getDataValue('bitcointalk'),
+                        twitter:        ico.getDataValue('twitter'),
+                        facebook:       ico.getDataValue('facebook'),
+                        reddit:         ico.getDataValue('reddit'),
+                        medium:         ico.getDataValue('medium'),
+                        admin_score:    ico.getDataValue('admin_score'),
+                        updated_at:     ico.getDataValue('updated_at'),
+                        created_at:     ico.getDataValue('created_at')
+                    }
+                );
 
-                updatePerson_({
-                    id: object.id === 0 ? object._id : object.id,
-                    name: object.name,
-                    title: object.title,
-                    photo: object.photo.split('images/')[1].split('/')[1] === "team" ? "no-image.jpg" : object.photo.split('images/')[1].split('/')[1],
-                    icos: object.icos.map(el => { return el.name.trim() }).join(','),
-                    country: $('.location').text().trim(),
-                    about: $("h3:contains('About')").next().text().trim(),
-                    social: social,
-                    available_for: available_for,
-                    distribution_rates: distribution_rates !== "" ? distribution_rates : -1,
-                    distribution_average_rate: distribution_average_rate !== "" ? distribution_average_rate : -1,
-                    distribution_weight: distribution_weight !== "" ? distribution_weight : -1,
-                    profile_score: profile_score !== "" ? profile_score : -1,
-                    ratings_score: ratings_score !== "" ? ratings_score : -1,
-                    time_score: time_score !== "" ? time_score : -1,
-                    iss: iss !== "" ? iss : -1,
-                    acceptance_score: acceptance_score !== "" ? acceptance_score : -1,
-                    contribution_score: contribution_score !== "" ? contribution_score : -1
-                }, {
-                    people_id: object.id === 0 ? object._id : object.id,
-                    score: object.iss
-                });
-                callback();
-            })
-            .catch(error => {
-                logger.error("Could not load source `" + object.url + "`. Error: " + error);
-                scraper.push(object);
-                callback();
-            })
-    }, 12)
+            });
+
+        });
+
 };
 
 
 /**
- * Scraping people every 24 hours
+ * Update ICOs array
+ * @param action - add|update|delete
+ * @param ico - Object
  * @private
  */
-let initPeople_ = function () {
-    initScraper_();
-
-    setInterval(getAllPeople_, 1000*60*60*24);
-    getAllPeople_();
+let updateIcosArr_ = function (action, ico) {
+    switch (action) {
+        case "add":
+            icos[parseInt(ico.id)] = ico;
+            break;
+        case "update":
+            icos[parseInt(ico.id)] = ico;
+            break;
+        case "delete":
+            delete icos[parseInt(ico.id)];
+            break;
+    }
 };
 
+/**
+ * Insert score to Table `icos_scores`
+ * @param score - Object
+ * @private
+ */
+let insertScoreToDB_ = function (score) {
+    models.icos_scores.create(score);
+};
+
+
+/**
+ * Call functions for updating score
+ * @param ico - Object
+ * @returns score - Object
+ * @private
+ */
+let update_ = async function (ico) {
+    // TODO function with update score
+    let score = {
+        ico_id: ico.id,
+        telegram: 0,
+        bitcointalk: 0,
+        twitter: 0,
+        facebook: 0,
+        reddit: 0,
+        medium: 0,
+        google: 0,
+        total_visits: 0,
+        mentions: 0,
+        admin_score: 0,
+        hype_score: 0,
+        created_at: new Date()
+    };
+
+    insertScoreToDB_(score);
+
+    return score;
+};
+
+/**
+ * Update ICOs Scores every day
+ * @private
+ */
+let updateIcoScores_ = async function () {
+    if (icos !== undefined) {
+        for (let i in icos) {
+            update_(icos[i]);
+        }
+    }
+};
+
+
+/**
+ * Update ICO Scores from request
+ * @param ico - Object
+ * @returns Object
+ * @private
+ */
+let updateIcoScoresFromRequest_ = async function (ico) {
+    ico.scores = await update_(ico);
+    delete ico.scores.ico_id;
+    return ico;
+};
+
+
+/**
+ * Scraping hype_score every 24 hours
+ * @private
+ */
+let initHypeScore_ = async function () {
+    await getAllIcos_();
+    await updateIcoScores_();
+    setInterval(updateIcoScores_, 1000*60*60*24);
+};
 
 module.exports = {
-    init: initPeople_,
+    init            : initHypeScore_,
+    updateScores    : updateIcoScoresFromRequest_,
+    updateIcos      : updateIcosArr_
 };

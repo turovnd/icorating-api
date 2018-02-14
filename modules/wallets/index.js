@@ -1,4 +1,3 @@
-const axios      = require('axios');
 const tress      = require('tress');
 const logger     = require('./../logger')();
 const models     = require('../../models');
