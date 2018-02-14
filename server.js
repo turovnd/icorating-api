@@ -46,8 +46,8 @@ app.listen(process.env.PORT, () => {
 
     models.sequelize.sync().then(() => {
         logger.info("Server Ready! Site: " + process.env.SITE + ":" + process.env.PORT);
-        wallets.init();
-        people.init();
+        // wallets.init();
+        // people.init();
     });
 
 });
