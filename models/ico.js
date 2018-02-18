@@ -16,7 +16,7 @@ module.exports = function(sequelize, Sequelize) {
             notEmpty: true
         },
 
-        telegram: {
+        telegram: { // @channelusername
             type: Sequelize.STRING
         },
 
@@ -28,15 +28,15 @@ module.exports = function(sequelize, Sequelize) {
             type: Sequelize.STRING
         },
 
-        facebook: {
+        facebook: { // page_name
             type: Sequelize.STRING
         },
 
-        reddit: {
+        reddit: { // page_name
             type: Sequelize.STRING
         },
 
-        medium: {
+        medium: { // @user_name
             type: Sequelize.STRING
         },
 

@@ -15,12 +15,3 @@ services:
     links:
       - mysql
     env_file: Docker/phpmyadmin.env
-
-  node:
-    build: .
-    container_name: icorating_api
-    ports:
-      - 3000:3000
-    links:
-      - mysql
-    working_dir: /var/www/
