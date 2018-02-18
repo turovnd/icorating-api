@@ -20,11 +20,11 @@ module.exports = function(sequelize, Sequelize) {
             type: Sequelize.STRING
         },
 
-        bitcointalk: {
+        bitcointalk: { // topic_number
             type: Sequelize.STRING
         },
 
-        twitter: {
+        twitter: { // page_name
             type: Sequelize.STRING
         },
 

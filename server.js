@@ -51,7 +51,6 @@ app.listen(process.env.PORT, () => {
         // wallets.init();
         // people.init();
         hypescore.init();
-        // require('./modules/hypescore/medium').countFollows('@TeamDeedCoin');
     });
 
 });

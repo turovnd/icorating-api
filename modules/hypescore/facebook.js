@@ -3,12 +3,12 @@ const Facebook = require('facebook-node-sdk');
 
 const facebook = new Facebook({ appId: '1861060970585441', secret: 'Cb4Ql8n0lbsb0JxBvOwFJqzaI80' });
 
-let countFollows_ = function (pageName) {
+let countFollowers_ = function (pageName) {
     if (pageName === "" || pageName === null || pageName === undefined) {
         return 0;
     }
     return new Promise((resolve, reject) => {
-        facebook.api('/' + pageName + '/?fields=fan_count', function(err, data) {
+        facebook.api('/' + pageName + '/?fields=fan_count', (err, data) => {
             if (err) reject(err);
             else resolve(data)
         });
@@ -23,5 +23,5 @@ let countFollows_ = function (pageName) {
 };
 
 module.exports = {
-    countFollows: countFollows_
+    countFollowers: countFollowers_
 };

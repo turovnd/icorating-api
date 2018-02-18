@@ -1,7 +1,7 @@
 const logger = require('../logger')();
 const axios  = require('axios');
 
-let countFollows_ = function (pageName) {
+let countFollowers_ = function (pageName) {
     if (pageName === "" || pageName === null || pageName === undefined) {
         return 0;
     }
@@ -9,15 +9,15 @@ let countFollows_ = function (pageName) {
         .then(response => {
             let data = JSON.parse(response.data.substring(response.data.search('{'), response.data.length)),
                 userId = data.payload.user.userId;
-            return data['payload']['references']['SocialStats'][userId]['usersFollowedByCount'];
+            return parseInt(data['payload']['references']['SocialStats'][userId]['usersFollowedByCount']);
         })
         .catch(error => {
-            logger.error("Medium: error occur on getting fan count: " + error);
+            logger.error("Medium: error occur on getting followers count: " + error);
             return 0;
         });
 };
 
 module.exports = {
-    countFollows: countFollows_
+    countFollowers: countFollowers_
 };
 
