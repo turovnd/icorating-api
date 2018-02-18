@@ -82,12 +82,12 @@ let update_ = async function (ico) {
     // TODO function with update score
     let score = {
         ico_id: ico.id,
-        telegram: await require('./telegram').countChatMembers(ico.telegram),
-        bitcointalk: await require('./bitcointalk').countFollowers(ico.bitcointalk),
-        twitter: await require('./twitter').countFollowers(ico.twitter),
-        facebook: await require('./facebook').countFollowers(ico.facebook),
-        reddit: await require('./reddit').countFollowers(ico.reddit),
-        medium: await require('./medium').countFollowers(ico.medium),
+        telegram    : await require('./telegram').countChatMembers(ico.telegram),
+        bitcointalk : await require('./bitcointalk').countFollowers(ico.bitcointalk),
+        twitter     : await require('./twitter').countFollowers(ico.twitter),
+        facebook    : await require('./facebook').countFollowers(ico.facebook),
+        reddit      : await require('./reddit').countFollowers(ico.reddit),
+        medium      : await require('./medium').countFollowers(ico.medium),
         google: 0,
         total_visits: 0,
         mentions: 0,
