@@ -8,6 +8,7 @@ const logger     = require('./modules/logger')();
 const models     = require("./models");
 const wallets    = require("./modules/wallets");
 const people     = require("./modules/people");
+const hypescore  = require("./modules/hypescore");
 
 let app = express();
 
@@ -30,6 +31,7 @@ app.use(function (req, res, next) {
 
 // Use Server Side routes for API
 app.use('/api', require('./routes/projects'));
+app.use('/api', require('./routes/icos'));
 
 app.use('/api', (req, res, next) => {
     res.render('api.html');
@@ -46,8 +48,9 @@ app.listen(process.env.PORT, () => {
 
     models.sequelize.sync().then(() => {
         logger.info("Server Ready! Site: " + process.env.SITE + ":" + process.env.PORT);
-        wallets.init();
-        people.init();
+        // wallets.init();
+        // people.init();
+        hypescore.init();
     });
 
 });

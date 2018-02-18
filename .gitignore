@@ -26,4 +26,8 @@ typings/
 
 assets/people/*
 !assets/people/no-image.jpg
+
 package-lock.json
+
+# Docker
+Docker/*.env
