@@ -80,7 +80,7 @@ let insertScoreToDB_ = function (score) {
  */
 let update_ = async function (ico) {
     // TODO function with update score
-    let score = {
+    let scores = {
         ico_id: ico.id,
         telegram    : await require('./telegram').countChatMembers(ico.telegram),
         bitcointalk : await require('./bitcointalk').countFollowers(ico.bitcointalk),
@@ -96,9 +96,9 @@ let update_ = async function (ico) {
         created_at: new Date()
     };
 
-    insertScoreToDB_(score);
+    insertScoreToDB_(scores);
 
-    return score;
+    return scores;
 };
 
 /**
