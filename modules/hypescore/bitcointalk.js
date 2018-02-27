@@ -14,8 +14,7 @@ let countFollowers_ = function (url) {
             }
         })
         .catch(error => {
-            logger.error("Bitcontalk: error occur on getting followers count: " + error);
-            return 0;
+            logger.error("Bitcontalk: error occur on getting followers count: `" + url + "`. " + error);
         });
 };
 
@@ -23,7 +22,10 @@ let getPage_ = function (topic) {
     if (topic === "" || topic === null || topic === undefined) {
         return 0;
     }
-    return axios.get('https://bitcointalk.org/index.php?topic=' + topic + '.0')
+
+    let url = 'https://bitcointalk.org/index.php?topic=' + topic + '.0';
+
+    return axios.get(url)
         .then(response => {
             let $ = cheerio.load(response.data),
                 table = $('#bodyarea').find('> table');
@@ -35,8 +37,7 @@ let getPage_ = function (topic) {
             }
         })
         .catch(error => {
-            logger.error("Bitcontalk: error occur on getting page: " + error);
-            return 0;
+            logger.error("Bitcontalk: error occur on getting page: `" + url + "`. " + error);
         });
 };
 

@@ -5,13 +5,15 @@ let countFollowers_ = function (pageName) {
     if (pageName === "" || pageName === null || pageName === undefined) {
         return 0;
     }
-    return axios.get('https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=' + pageName)
+
+    let url = 'https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=' + pageName;
+
+    return axios.get(url)
         .then(response => {
             return parseInt(response.data[0]['followers_count']);
         })
         .catch(error => {
-            logger.error("Twitter: error occur on getting followers count: " + error);
-            return 0;
+            logger.error("Twitter: error occur on getting followers count: `" + url + "`. " + error);
         });
 };
 

@@ -1,7 +1,7 @@
 const logger   = require('../logger')();
 const Facebook = require('facebook-node-sdk');
 
-const facebook = new Facebook({ appId: '1861060970585441', secret: 'Cb4Ql8n0lbsb0JxBvOwFJqzaI80' });
+const facebook = new Facebook({ appId: process.env.FACEBOOK_APP_ID, secret: process.env.FACEBOOK_SECRET });
 
 let countFollowers_ = function (pageName) {
     if (pageName === "" || pageName === null || pageName === undefined) {
@@ -17,8 +17,7 @@ let countFollowers_ = function (pageName) {
             return data.fan_count
         })
         .catch(err => {
-            logger.error("Facebook: error occur on getting fan count: " + err.message);
-            return 0;
+            logger.error("Facebook: error occur on getting fan count: `" + pageName + "`. " + err.message);
         });
 };
 
