@@ -33,7 +33,7 @@ module.exports = function(sequelize, Sequelize) {
             type: Sequelize.INTEGER
         },
 
-        google: {
+        bing: {
             type: Sequelize.INTEGER
         },
 

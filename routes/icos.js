@@ -21,6 +21,7 @@ router.get('/icos', (req, res, next) => {
                     {
                         id:             ico.getDataValue('id'),
                         name:           ico.getDataValue('name'),
+                        website:        ico.getDataValue('website'),
                         telegram:       ico.getDataValue('telegram'),
                         bitcointalk:    ico.getDataValue('bitcointalk'),
                         twitter:        ico.getDataValue('twitter'),
@@ -35,6 +36,8 @@ router.get('/icos', (req, res, next) => {
                             facebook:       score.facebook,
                             reddit:         score.reddit,
                             medium:         score.medium,
+                            bing:           score.bing,
+                            total_visits:   score.total_visits,
                             admin_score:    score.admin_score,
                             hype_score:     score.hype_score,
                             created_at:     score.created_at
@@ -67,6 +70,7 @@ router.post('/ico/add', (req, res, next) => {
 
     let insertedIco = {
         name:        req.body.name,
+        website:     req.body.website,
         telegram:    req.body.telegram,
         bitcointalk: req.body.bitcointalk,
         twitter:     req.body.twitter,
@@ -111,6 +115,7 @@ router.put('/ico/:id', (req, res, next) => {
             } else {
                 ico.updateAttributes({
                     name:        req.body.name,
+                    website:     req.body.website,
                     telegram:    req.body.telegram,
                     bitcointalk: req.body.bitcointalk,
                     twitter:     req.body.twitter,
@@ -123,6 +128,7 @@ router.put('/ico/:id', (req, res, next) => {
                 let newICO = {
                     id:             ico.getDataValue('id'),
                     name:           ico.getDataValue('name'),
+                    website:        ico.getDataValue('website'),
                     telegram:       ico.getDataValue('telegram'),
                     bitcointalk:    ico.getDataValue('bitcointalk'),
                     twitter:        ico.getDataValue('twitter'),

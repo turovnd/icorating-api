@@ -30,4 +30,4 @@ assets/people/*
 package-lock.json
 
 # Docker
-Docker/*.env
+docker-compose/*.env

@@ -16,6 +16,10 @@ module.exports = function(sequelize, Sequelize) {
             notEmpty: true
         },
 
+        website: {
+            type: Sequelize.STRING
+        },
+
         telegram: { // @channelusername
             type: Sequelize.STRING
         },

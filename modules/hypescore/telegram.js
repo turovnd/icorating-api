@@ -2,7 +2,7 @@ const logger   = require('../logger')();
 const telegram = require('telegram-bot-api');
 
 const api = new telegram({
-    token: '487424834:AAGZMI5yV2MwpnVCOw8_cOEd3eUf_dfXjmk'
+    token: process.env.TELEGRAM_TOKEN
 });
 
 let getChatMembersCount_ = function (chat_id) {
@@ -14,8 +14,7 @@ let getChatMembersCount_ = function (chat_id) {
     }).then(data => {
         return data;
     }).catch(err => {
-        logger.error("Telegram: error occur on getting chat members count: " + err.message);
-        return 0;
+        logger.error("Telegram: error occur on getting chat members count: `" + chat_id + "`. " + err.message);
     })
 };
 

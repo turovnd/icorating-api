@@ -23,6 +23,7 @@ let getAllIcos_ = function () {
                     {
                         id:             ico.getDataValue('id'),
                         name:           ico.getDataValue('name'),
+                        website:        ico.getDataValue('website'),
                         telegram:       ico.getDataValue('telegram'),
                         bitcointalk:    ico.getDataValue('bitcointalk'),
                         twitter:        ico.getDataValue('twitter'),
@@ -68,7 +69,12 @@ let updateIcosArr_ = function (action, ico) {
  * @private
  */
 let insertScoreToDB_ = function (score) {
-    models.icos_scores.create(score);
+    for (let field in score) {
+        if (score[field] === undefined || isNaN(score[field])) {
+            score[field] = 0;
+        }
+    }
+    models.icos_scores.create(score)
 };
 
 
@@ -81,22 +87,22 @@ let insertScoreToDB_ = function (score) {
 let update_ = async function (ico) {
     // TODO function with update score
     let scores = {
-        ico_id: ico.id,
+        ico_id      : ico.id,
         telegram    : await require('./telegram').countChatMembers(ico.telegram),
         bitcointalk : await require('./bitcointalk').countFollowers(ico.bitcointalk),
         twitter     : await require('./twitter').countFollowers(ico.twitter),
         facebook    : await require('./facebook').countFollowers(ico.facebook),
         reddit      : await require('./reddit').countFollowers(ico.reddit),
         medium      : await require('./medium').countFollowers(ico.medium),
-        google: 0,
-        total_visits: 0,
-        mentions: 0,
-        admin_score: 0,
-        hype_score: 0,
+        bing        : await require('./bind')(ico.name),
+        total_visits: await require('./total_visits')(ico.website),
+        mentions    : 0,
+        admin_score : 0,
+        hype_score  : 0,
         created_at: new Date()
     };
 
-    insertScoreToDB_(scores);
+    await insertScoreToDB_(scores);
 
     return scores;
 };
