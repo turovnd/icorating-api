@@ -36,6 +36,8 @@ router.get('/icos', (req, res, next) => {
                             facebook:       score.facebook,
                             reddit:         score.reddit,
                             medium:         score.medium,
+                            bing:           score.bing,
+                            total_visits:   score.total_visits,
                             admin_score:    score.admin_score,
                             hype_score:     score.hype_score,
                             created_at:     score.created_at

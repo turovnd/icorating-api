@@ -94,7 +94,7 @@ let update_ = async function (ico) {
         facebook    : await require('./facebook').countFollowers(ico.facebook),
         reddit      : await require('./reddit').countFollowers(ico.reddit),
         medium      : await require('./medium').countFollowers(ico.medium),
-        google      : await require('./bind')(ico.name),
+        bing        : await require('./bind')(ico.name),
         total_visits: await require('./total_visits')(ico.website),
         mentions    : 0,
         admin_score : 0,
