@@ -34,6 +34,13 @@ API_ETHERSCAN=api_key_from_etherscan.io
 
 ICOBENCH_PUBLIC_KEY=public_key_from_icobench
 ICOBENCH_PRIVATE_KEY=private_key_from_icobench
+
+API_BING=key_for_creating_azure_search_api_sercive
+TELEGRAM_TOKEN=487424834:AAGZMI5yV2MwpnVCOw8_cOEd3eUf_dfXjmk
+FACEBOOK_APP_ID=1861060970585441
+FACEBOOK_SECRET=Cb4Ql8n0lbsb0JxBvOwFJqzaI80
+
+MAINREST_GROUP=
 ```
 
 - Выполните следующие команды для запуска скрипта:
