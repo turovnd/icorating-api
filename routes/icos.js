@@ -38,6 +38,7 @@ router.get('/icos', (req, res, next) => {
                             medium:         score.medium,
                             bing:           score.bing,
                             total_visits:   score.total_visits,
+                            mentions:       score.mentions,
                             admin_score:    score.admin_score,
                             hype_score:     score.hype_score,
                             created_at:     score.created_at

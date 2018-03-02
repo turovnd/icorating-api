@@ -8,7 +8,7 @@ let countFollowers_ = function (url) {
             let $ = cheerio.load(response.data),
                 topics = $('.message_number');
             if (topics.length === 0) {
-                return 0;
+                return -1;
             } else {
                 return parseInt($(topics[topics.length-1]).text().replace(/[^0-9.]/g, ''));
             }
@@ -31,7 +31,7 @@ let getPage_ = function (topic) {
                 table = $('#bodyarea').find('> table');
 
             if (table.length === 0) {
-                return 0;
+                return -1;
             } else {
                 return countFollowers_($(table[0]).find('.prevnext').prev().attr('href'));
             }
