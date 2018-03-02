@@ -75,24 +75,31 @@ let savePersonPhoto_ = function(url) {
  * @private
  */
 let getAllPeople_ = function () {
-    let ico = new icoBench();
+    let ico  = new icoBench(),
+        page = 0;
 
-    let getPage_ = function (page) {
+    let getPage_ = function () {
         ico.get("people/all", data => {
             logger.info('Getting from API: `https://icobench.com/people/all/' + page + '` from ' + data.pages);
-            for (let i = 0; i < data.results.length; i++) {
-                savePersonPhoto_(data.results[i].photo);
-                scraper.push(data.results[i]);
-            }
-            if (data.currentPage !== data.pages) {
-                getPage_(data.currentPage+1);
+            if (data.results === undefined) {
+                setTimeout(() => {
+                    getPage_(page)
+                }, 1000)
             } else {
-                logger.info('Receive all people from source `https://icobench.com/people/all');
+                for (let i = 0; i < data.results.length; i++) {
+                    savePersonPhoto_(data.results[i].photo);
+                    scraper.push(data.results[i]);
+                }
+                if (data.currentPage !== data.pages - 1) {
+                    getPage_(page++);
+                } else {
+                    logger.info('Receive all people from source `https://icobench.com/people/all');
+                } 
             }
         }, {page: page});
     };
 
-    getPage_(0);
+    getPage_(page);
 };
 
 /**
