@@ -20,7 +20,7 @@ let countFollowers_ = function (url) {
 
 let getPage_ = function (topic) {
     if (topic === "" || topic === null || topic === undefined) {
-        return 0;
+        return -1;
     }
 
     let url = 'https://bitcointalk.org/index.php?topic=' + topic + '.0';

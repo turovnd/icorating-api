@@ -7,7 +7,7 @@ const api = new telegram({
 
 let getChatMembersCount_ = function (chat_id) {
     if (chat_id === "" || chat_id === null || chat_id === undefined) {
-        return 0;
+        return -1;
     }
     return api.getChatMembersCount({
         chat_id: chat_id

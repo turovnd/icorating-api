@@ -71,7 +71,7 @@ let updateIcosArr_ = function (action, ico) {
 let insertScoreToDB_ = function (score) {
     for (let field in score) {
         if (score[field] === undefined || isNaN(score[field])) {
-            score[field] = 0;
+            score[field] = -1;
         }
     }
     models.icos_scores.create(score)
@@ -96,7 +96,7 @@ let update_ = async function (ico) {
         medium      : await require('./medium').countFollowers(ico.medium),
         bing        : await require('./bind')(ico.name),
         total_visits: await require('./total_visits')(ico.website),
-        mentions    : 0,
+        mentions    : await require('./mainrest')(ico.name),
         admin_score : 0,
         hype_score  : 0,
         created_at: new Date()
@@ -112,9 +112,12 @@ let update_ = async function (ico) {
  * @private
  */
 let updateIcoScores_ = async function () {
-    if (icos !== undefined) {
-        for (let i in icos) {
-            update_(icos[i]);
+    let keys = Object.keys(icos);
+    if (keys.length > 0) {
+        let i = 0;
+        while (i < keys.length) {
+            await update_(icos[keys[i]]);
+            i++;
         }
     }
 };

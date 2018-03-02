@@ -5,7 +5,7 @@ const facebook = new Facebook({ appId: process.env.FACEBOOK_APP_ID, secret: proc
 
 let countFollowers_ = function (pageName) {
     if (pageName === "" || pageName === null || pageName === undefined) {
-        return 0;
+        return -1;
     }
     return new Promise((resolve, reject) => {
         facebook.api('/' + pageName + '/?fields=fan_count', (err, data) => {

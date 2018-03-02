@@ -93,7 +93,7 @@ let getAllPeople_ = function () {
                 if (data.currentPage !== data.pages - 1) {
                     getPage_(page++);
                 } else {
-                    logger.info('Receive all people from source `https://icobench.com/people/all');
+                    logger.info('Receive all people from source `https://icobench.com/people/all`.');
                 } 
             }
         }, {page: page});

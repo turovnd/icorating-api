@@ -3,7 +3,7 @@ const axios  = require('axios');
 
 let countFollowers_ = function (pageName) {
     if (pageName === "" || pageName === null || pageName === undefined) {
-        return 0;
+        return -1;
     }
 
     let url = 'https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=' + pageName;
