@@ -75,11 +75,11 @@ module.exports = function (address, callback) {
                             insertArray.push({
                                 address: address,
                                 hash: current.hash,
-                                timeStamp: current.timeStamp,
+                                timestamp: current.timeStamp,
                                 from: current.from,
                                 to: current.to,
                                 value: currentValue,
-                                totalValue: totalValue
+                                total_value: totalValue
                             })
                         }
                     }
