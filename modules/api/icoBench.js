@@ -1,3 +1,6 @@
+'use strict';
+require('dotenv').config();
+
 const request   = require('request');
 const CryptoJS  = require('crypto-js');
 
@@ -29,4 +32,4 @@ module.exports = class {
             }
         });
     }
-}
+};

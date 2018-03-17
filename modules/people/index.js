@@ -1,4 +1,5 @@
 'use strict';
+require('dotenv').config();
 const fs        = require('fs');
 const needle    = require('needle');
 const tress     = require('tress');
@@ -80,7 +81,8 @@ let getAllPeople_ = function () {
 
     let getPage_ = function () {
         ico.get("people/all", data => {
-            logger.info('Getting from API: `https://icobench.com/people/all/' + page + '` from ' + data.pages);
+            if (process.env.NODE_ENV === "development")
+                logger.info('Getting from API: `https://icobench.com/people/all/' + page + '` from ' + data.pages);
             if (data.results === undefined) {
                 setTimeout(() => {
                     getPage_(page)
@@ -172,13 +174,11 @@ let initScraper_ = function () {
  * @private
  */
 let initPeople_ = function () {
+    logger.info("People scraper initialize");
     initScraper_();
+    getAllPeople_();
 
     setInterval(getAllPeople_, 1000*60*60*24);
-    getAllPeople_();
 };
 
-
-module.exports = {
-    init: initPeople_,
-};
+initPeople_();

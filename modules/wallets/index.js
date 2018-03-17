@@ -1,5 +1,5 @@
 const tress      = require('tress');
-const logger     = require('./../logger')();
+const logger     = require('../logger')();
 const models     = require('../../models');
 const Exchanges  = require('../exchanges');
 const blockchain = require('./blockchain');
@@ -129,7 +129,6 @@ let updateWalletBalance_ = async function () {
     let projects = await getAllProjects_();
     let course = await getCourse_();
 
-    console.log(projects.length, course)
     if (projects.length > 0) {
         for (let i in projects) {
             updateAddressBalance_(projects[i], course, () => { } );
@@ -139,7 +138,7 @@ let updateWalletBalance_ = async function () {
 
 let initWallets_ = async function () {
     await updateWalletBalance_();
-    setInterval(updateWalletBalance_, 1000*15);
+    setInterval(updateWalletBalance_, 1000*60*60*12);
 };
 
 module.exports = {
