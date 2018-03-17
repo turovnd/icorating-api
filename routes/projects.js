@@ -64,9 +64,9 @@ router.post('/project/add', (req, res, next) => {
 
             insertedProject.id = project.getDataValue('id');
 
-            await Projects.updateProjects("add", insertedProject);
+            let course = await Projects.getCourse();
 
-            Projects.updateBalance(insertedProject, result => {
+            await Projects.updateBalance(insertedProject, course, result => {
                 res.json({
                     status: 1,
                     data: result,
@@ -104,15 +104,16 @@ router.put('/project/:id', (req, res, next) => {
                     created_at: project.getDataValue('created_at')
                 };
 
-                await Projects.updateProjects("update", newProject);
+                let course = await Projects.getCourse();
 
-                Projects.updateBalance(newProject, result => {
+                await Projects.updateBalance(newProject, course, result => {
                     res.json({
                         status: 1,
                         data: result,
                         message: "Project updated successfully"
                     })
-                })
+                });
+
             }
 
     });
@@ -130,7 +131,6 @@ router.delete('/project/:id', (req, res, next) => {
                 message: "Project with id=" + req.params.id + " not found"
             })
         } else {
-            Projects.updateProjects("delete", {id: req.params.id});
             res.json({
                 status: 1,
                 message: "Project deleted successfully"

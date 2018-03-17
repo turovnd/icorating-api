@@ -5,39 +5,10 @@ const Exchanges  = require('../exchanges');
 const blockchain = require('./blockchain');
 const etherscan  = require('./etherscan');
 
-let projects = [];
-
-// Update `projects` Array
-let updateProjectsArr_ = function (action, project) {
-
-    switch (action) {
-        case "add":
-            projects.push(project);
-            break;
-        case "update":
-            for (let i in projects) {
-                if (parseInt(projects[i].id) === parseInt(project.id)) {
-                    projects[i] = project;
-                    break;
-                }
-            }
-            break;
-        case "delete":
-            for (let i in projects) {
-                if (parseInt(projects[i].id) === parseInt(project.id)) {
-                    projects.splice(i, 1);
-                    break;
-                }
-            }
-            break;
-    }
-};
-
 // Get All Projects
 let getAllProjects_ = function () {
 
     return models.projects.findAll({
-        include: ["Prices"],
         order: [["created_at", 'DESC']]
     })
         .then(getProjects => {
@@ -52,7 +23,6 @@ let getAllProjects_ = function () {
                         ticker      : project.getDataValue('ticker'),
                         wallets     : project.getDataValue('wallets'),
                         created_at  : project.getDataValue('created_at'),
-                        price       : project.getPrices()[project.getPrices().length - 1] || {}
                     }
                 );
             });
@@ -119,14 +89,17 @@ let updateAddressBalance_ = function (project, course, done) {
 
             }
 
-        }, 10),
+        }, 1),
 
         complete = function () {
             project.price_btc = priceArr.BTC;
             project.price_eth = priceArr.ETH;
             project.price_usd = priceArr.USD;
             project.updated_at = new Date();
-            updateProjectBalanceInDB_(project);
+
+            if (project.price_btc !== 0 && project.price_eth !== 0 && project.price_usd !== 0)
+                updateProjectBalanceInDB_(project);
+
             done(project);
         };
 
@@ -152,28 +125,25 @@ let updateAddressBalance_ = function (project, course, done) {
 };
 
 // Update All Project Wallets Balances
-let updateWalletBalance_ = async function (project, callback) {
+let updateWalletBalance_ = async function () {
+    let projects = await getAllProjects_();
     let course = await getCourse_();
 
-    if (project) {
-        updateAddressBalance_(project, course, callback);
-    } else {
-        if (projects.length > 0) {
-            for (let i in projects) {
-                updateAddressBalance_(projects[i], course, () => {} );
-            }
+    console.log(projects.length, course)
+    if (projects.length > 0) {
+        for (let i in projects) {
+            updateAddressBalance_(projects[i], course, () => { } );
         }
     }
 };
 
 let initWallets_ = async function () {
-    projects = await getAllProjects_();
     await updateWalletBalance_();
-    setInterval(updateWalletBalance_, 1000*60*60*12);
+    setInterval(updateWalletBalance_, 1000*15);
 };
 
 module.exports = {
     init            : initWallets_,
-    updateBalance   : updateWalletBalance_,
-    updateProjects  : updateProjectsArr_
+    getCourse       : getCourse_,
+    updateBalance   : updateAddressBalance_,
 };

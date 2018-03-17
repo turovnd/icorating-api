@@ -36,17 +36,19 @@ module.exports = function (address, callback) {
                     // save all transaction to DB
                     while (getTransactions.length !== 0) {
                         current = getTransactions.pop();
-                        currentValue = parseFloat(current.value) / 1000000000000000000;
-                        totalValue += currentValue;
-                        insertArray.push({
-                            address: address,
-                            hash: current.hash,
-                            timestamp: current.timeStamp,
-                            from: current.from,
-                            to: current.to,
-                            value: currentValue,
-                            total_value: totalValue
-                        })
+                        if (!(parseInt(current.isError) === 1 || current.to.toUpperCase() !== address.toUpperCase())) {
+                            currentValue = parseFloat(current.value) / 1000000000000000000;
+                            totalValue += currentValue;
+                            insertArray.push({
+                                address: address,
+                                hash: current.hash,
+                                timestamp: current.timeStamp,
+                                from: current.from,
+                                to: current.to,
+                                value: currentValue,
+                                total_value: totalValue
+                            })
+                        }
                     }
                 } else {
                     // get last transaction from DB
@@ -67,17 +69,19 @@ module.exports = function (address, callback) {
 
                     while (newTransactions.length !== 0) {
                         current = newTransactions.pop();
-                        currentValue = parseFloat(current.value) / 1000000000000000000;
-                        totalValue += currentValue;
-                        insertArray.push({
-                            address: address,
-                            hash: current.hash,
-                            timeStamp: current.timeStamp,
-                            from: current.from,
-                            to: current.to,
-                            value: currentValue,
-                            totalValue: totalValue
-                        })
+                        if (!(parseInt(current.isError) === 1 || current.to.toUpperCase() !== address.toUpperCase())) {
+                            currentValue = parseFloat(current.value) / 1000000000000000000;
+                            totalValue += currentValue;
+                            insertArray.push({
+                                address: address,
+                                hash: current.hash,
+                                timeStamp: current.timeStamp,
+                                from: current.from,
+                                to: current.to,
+                                value: currentValue,
+                                totalValue: totalValue
+                            })
+                        }
                     }
                 }
                 models.transactions.bulkCreate(insertArray).then(() => {
