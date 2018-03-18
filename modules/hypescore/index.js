@@ -44,17 +44,26 @@ let getAllIcos_ = function () {
  * @private
  */
 let insertScoreToDB_ = function (score) {
-    models.icos_scores.findAll({
-        order: [["created_at", 'DESC']],
-        limit: 1
+    return models.icos_scores.findOne({
+        where: {ico_id: score.ico_id},
+        order: [["created_at", 'DESC']]
     })
         .then(oldscore => {
+
             for (let field in score) {
-                if (score[field] === -1 && oldscore[0].getDataValue(field) !== -1) {
-                    score[field] = oldscore[0].getDataValue(field);
+                if (score[field] === null || isNaN(score[field])) {
+                    score[field] = -1;
+                }
+
+                if (oldscore !== null) {
+                    if (score[field] === -1 && oldscore.getDataValue(field) !== -1) {
+                        score[field] = oldscore.getDataValue(field);
+                    }
                 }
             }
-            models.icos_scores.create(score)
+
+            return models.icos_scores.create(score);
+
         });
 };
 

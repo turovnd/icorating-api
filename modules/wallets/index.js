@@ -34,13 +34,32 @@ let getAllProjects_ = function () {
 
 // Update Project
 let updateProjectBalanceInDB_ = function (project) {
-    models.projects_prices.create({
-        project_id: project.id,
-        price_btc: project.price_btc,
-        price_eth: project.price_eth,
-        price_usd: project.price_usd,
-        created_at: new Date()
-    });
+    return models.projects_prices.findOne({
+        where: {project_id: project.id},
+        order: [["created_at", 'DESC']]
+    })
+        .then(oldprice => {
+
+            if (oldprice !== null) {
+                if (project.price_btc === 0 && oldprice.getDataValue('price_btc') !== 0)
+                    project.price_btc = oldprice.getDataValue('price_btc');
+                if (project.price_eth === 0 && oldprice.getDataValue('price_eth') !== 0)
+                    project.price_eth = oldprice.getDataValue('price_eth');
+                if (project.price_usd === 0 && oldprice.getDataValue('price_usd') !== 0)
+                    project.price_usd = oldprice.getDataValue('price_usd');
+            }
+
+            models.projects_prices.create({
+                project_id: project.id,
+                price_btc: project.price_btc,
+                price_eth: project.price_eth,
+                price_usd: project.price_usd,
+                created_at: new Date()
+            });
+
+            return project;
+        });
+
 };
 
 
@@ -93,14 +112,13 @@ let updateAddressBalance_ = function (project, course, done) {
 
         }, 1),
 
-        complete = function () {
+        complete = async function () {
             project.price_btc = priceArr.BTC;
             project.price_eth = priceArr.ETH;
             project.price_usd = priceArr.USD;
             project.updated_at = new Date();
 
-            if (project.price_btc !== 0 && project.price_eth !== 0 && project.price_usd !== 0)
-                updateProjectBalanceInDB_(project);
+            project = await updateProjectBalanceInDB_(project);
 
             done(project);
         };
