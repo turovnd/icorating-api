@@ -143,7 +143,7 @@ router.put('/ico/:id', (req, res, next) => {
 
                 res.json({
                     status: 1,
-                    message: "Project updated successfully",
+                    message: "ICO updated successfully",
                     data: newICO
                 })
 
