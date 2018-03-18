@@ -16,6 +16,7 @@ let countFollowers_ = function (pageName) {
         })
         .catch(error => {
             logger.error("Medium: error occur on getting followers count: `" + url + "`. " + error);
+            return -1;
         });
 };
 

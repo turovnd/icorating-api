@@ -15,6 +15,7 @@ let countFollowers_ = function (url) {
         })
         .catch(error => {
             logger.error("Bitcontalk: error occur on getting followers count: `" + url + "`. " + error);
+            return -1;
         });
 };
 
@@ -38,6 +39,7 @@ let getPage_ = function (topic) {
         })
         .catch(error => {
             logger.error("Bitcontalk: error occur on getting page: `" + url + "`. " + error);
+            return -1;
         });
 };
 

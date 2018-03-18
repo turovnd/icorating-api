@@ -4,6 +4,10 @@ const cheerio = require('cheerio');
 
 module.exports = (website) => {
 
+    if (website === "" || website === null || website === undefined) {
+        return -1;
+    }
+
     if (website.search('://') !== -1) website = website.split('://')[1];
     if (website.search('/') !== -1) website = website.split('/')[0];
 
@@ -11,6 +15,7 @@ module.exports = (website) => {
 
     return axios.get(website)
         .then(response => {
+
             let $ = cheerio.load(response.data);
 
             let visitors  = $(".info-test:contains('Открытая статистика')").parent().next().find('tbody').find("td:contains('Посетители')").parent();
@@ -23,6 +28,7 @@ module.exports = (website) => {
         })
         .catch(error => {
             logger.error('Total visits error on load page: `' + website + '`. ' + error);
+            return -1;
         });
 
 };

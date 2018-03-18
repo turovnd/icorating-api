@@ -25,7 +25,9 @@ let getAllProjects_ = function () {
                         created_at  : project.getDataValue('created_at'),
                     }
                 );
+
             });
+
         });
 
 };

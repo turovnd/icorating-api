@@ -6,9 +6,6 @@ const bodyParser = require('body-parser');
 const logger     = require('./modules/logger')();
 
 const models     = require("./models");
-const wallets    = require("./modules/wallets");
-const people     = require("./modules/people");
-const hypescore  = require("./modules/hypescore");
 
 let app = express();
 
@@ -48,9 +45,6 @@ app.listen(process.env.PORT, () => {
 
     models.sequelize.sync().then(() => {
         logger.info("Server Ready! Site: " + process.env.SITE + ":" + process.env.PORT);
-        // wallets.init();
-        // people.init();
-        // hypescore.init();
     });
 
 });

@@ -88,8 +88,6 @@ router.post('/ico/add', (req, res, next) => {
             insertedIco.updated_at  = ico.getDataValue('updated_at');
             insertedIco.created_at  = ico.getDataValue('created_at');
 
-            await hypescore.updateIcos("add", insertedIco);
-
             insertedIco = await hypescore.updateScores(insertedIco);
 
             res.json({
@@ -141,8 +139,6 @@ router.put('/ico/:id', (req, res, next) => {
                     created_at:     ico.getDataValue('created_at')
                 };
 
-                await hypescore.updateIcos("update", newICO);
-
                 newICO = await hypescore.updateScores(newICO);
 
                 res.json({
@@ -168,7 +164,6 @@ router.delete('/ico/:id', (req, res, next) => {
                 message: "ICO with id=" + req.params.id + " not found"
             })
         } else {
-            hypescore.updateIcos("delete", {id: req.params.id});
             res.json({
                 status: 1,
                 message: "ICO deleted successfully"

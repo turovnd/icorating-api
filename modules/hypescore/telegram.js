@@ -15,6 +15,7 @@ let getChatMembersCount_ = function (chat_id) {
         return data;
     }).catch(err => {
         logger.error("Telegram: error occur on getting chat members count: `" + chat_id + "`. " + err.message);
+        return -1;
     })
 };
 

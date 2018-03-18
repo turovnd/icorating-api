@@ -3,6 +3,10 @@ const axios   = require('axios');
 
 module.exports = (name) => {
 
+    if (name === "" || name === null || name === undefined) {
+        return -1;
+    }
+
     let url = 'http://rss.mainrest.ru/keyword/' + process.env.MAINREST_GROUP + '/'+ name;
 
     return axios.get(url)
@@ -11,6 +15,7 @@ module.exports = (name) => {
         })
         .catch(error => {
             logger.error('Mainrest: could not load page: `' + url + '`. ' + error);
+            return -1;
         });
 
 };

@@ -18,6 +18,7 @@ let countFollowers_ = function (pageName) {
         })
         .catch(err => {
             logger.error("Facebook: error occur on getting fan count: `" + pageName + "`. " + err.message);
+            return -1;
         });
 };
 

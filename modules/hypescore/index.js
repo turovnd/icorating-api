@@ -1,10 +1,6 @@
 'use strict';
 const models    = require('../../models');
 
-// Array of all ICOs in DB
-let icos = {};
-
-
 /**
  * Get all ICOs from DB
  * @private
@@ -18,7 +14,7 @@ let getAllIcos_ = function () {
 
             return allicos.map(ico => {
 
-                icos[parseInt(ico.getDataValue('id'))] = Object.assign(
+                return Object.assign(
                     {},
                     {
                         id:             ico.getDataValue('id'),
@@ -42,39 +38,24 @@ let getAllIcos_ = function () {
 
 };
 
-
-/**
- * Update ICOs array
- * @param action - add|update|delete
- * @param ico - Object
- * @private
- */
-let updateIcosArr_ = function (action, ico) {
-    switch (action) {
-        case "add":
-            icos[parseInt(ico.id)] = ico;
-            break;
-        case "update":
-            icos[parseInt(ico.id)] = ico;
-            break;
-        case "delete":
-            delete icos[parseInt(ico.id)];
-            break;
-    }
-};
-
 /**
  * Insert score to Table `icos_scores`
  * @param score - Object
  * @private
  */
 let insertScoreToDB_ = function (score) {
-    for (let field in score) {
-        if (score[field] === undefined || isNaN(score[field])) {
-            score[field] = -1;
-        }
-    }
-    models.icos_scores.create(score)
+    models.icos_scores.findAll({
+        order: [["created_at", 'DESC']],
+        limit: 1
+    })
+        .then(oldscore => {
+            for (let field in score) {
+                if (score[field] === -1 && oldscore[0].getDataValue(field) !== -1) {
+                    score[field] = oldscore[0].getDataValue(field);
+                }
+            }
+            models.icos_scores.create(score)
+        });
 };
 
 
@@ -85,7 +66,7 @@ let insertScoreToDB_ = function (score) {
  * @private
  */
 let update_ = async function (ico) {
-    // TODO function with update score
+
     let scores = {
         ico_id      : ico.id,
         telegram    : await require('./telegram').countChatMembers(ico.telegram),
@@ -112,12 +93,11 @@ let update_ = async function (ico) {
  * @private
  */
 let updateIcoScores_ = async function () {
-    let keys = Object.keys(icos);
-    if (keys.length > 0) {
-        let i = 0;
-        while (i < keys.length) {
-            await update_(icos[keys[i]]);
-            i++;
+    let icos = await getAllIcos_();
+
+    if (icos.length > 0) {
+        for (let i in icos) {
+            await update_(icos[i]);
         }
     }
 };
@@ -141,7 +121,6 @@ let updateIcoScoresFromRequest_ = async function (ico) {
  * @private
  */
 let initHypeScore_ = async function () {
-    await getAllIcos_();
     await updateIcoScores_();
     setInterval(updateIcoScores_, 1000*60*60*24);
 };
@@ -149,5 +128,4 @@ let initHypeScore_ = async function () {
 module.exports = {
     init            : initHypeScore_,
     updateScores    : updateIcoScoresFromRequest_,
-    updateIcos      : updateIcosArr_
 };

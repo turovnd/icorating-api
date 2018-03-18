@@ -14,6 +14,7 @@ let countFollowers_ = function (pageName) {
         })
         .catch(error => {
             logger.error("Reddit: error occur on getting followers count: `" + url + "`. " + error);
+            return -1;
         });
 };
 
