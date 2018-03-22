@@ -27,7 +27,7 @@ module.exports = class {
             forever: true,
             json: data
         }, function (error, response, body){
-            if (error === null && body.error === undefined) {
+            if (error === null) {
                 callback(body);
             }
         });

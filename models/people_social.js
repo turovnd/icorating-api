@@ -2,17 +2,22 @@ module.exports = function(sequelize, Sequelize) {
 
     'use strict';
 
-    let Model = sequelize.define('people_scores', {
+    let Model = sequelize.define('people_social', {
 
-       people_id: { // from API
+        people_id: {
             type: Sequelize.INTEGER,
         },
 
-        score: { // from API
-            type: Sequelize.DOUBLE,
+        site: {
+            type: Sequelize.STRING,
+        },
+
+        url: {
+            type: Sequelize.STRING,
         }
 
     }, {
+        createdAt: false,
         updatedAt: false,
         underscored: true
     });

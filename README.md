@@ -41,6 +41,11 @@ FACEBOOK_APP_ID=1861060970585441
 FACEBOOK_SECRET=Cb4Ql8n0lbsb0JxBvOwFJqzaI80
 
 MAINREST_GROUP=ICOrating
+
+PEOPLE_IMAGES_PATH=/tmp
+
+# Time in hours
+PEOPLE_SCRAPER_TIME=24
 ```
 - Установите зависимости npm:
 ```

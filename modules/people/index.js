@@ -9,16 +9,101 @@ const models    = require('../../models');
 const icoBench  = require('../api/icoBench');
 
 let scraper = null;
+let api     = null;
+let total   = null;
+let counter = null;
 
 /**
- * Update person information in DB
- * @param personObj - Object for update table `people`
- * @param score - Object for update table `people_score`
+ * Search member from `people` table return first by name and ico
+ *
+ * @param name - person name
+ * @param ico - ICO name
+ * @returns {Promise}
  * @private
  */
-let updatePerson_ = function (personObj, score) {
+let findMemberIdByIco_ = (name, ico) => {
+    return models.people.findAll({
+            where: {
+                name: name,
+                icos: { like: '%'+ico+"%" }
+            }
+        }).then(members => {
+            return members.map(member => {
+                let icos = member.getDataValue('icos').split(','),
+                    hasIco = false;
 
-    models.people.findOrCreate({
+                for (let i in icos) {
+                    if (icos[i] === ico) {
+                        hasIco = true;
+                    }
+                }
+
+                if (hasIco) {
+                    return Object.assign(
+                        {},
+                        {
+                            id: member.getDataValue('id')
+                        }
+                    );
+                }
+            })[0];
+        });
+};
+
+
+/**
+ * Add row to `people_icos` table if not exist
+ *
+ * @param data { Object }
+ * @private
+ */
+let updateTablePeopleIcos_ = (data) => {
+    models.people_icos.findOrCreate({
+        where: {
+            people_id: data.people_id,
+            ico_name: data.ico_name
+        },
+        defaults: data
+    });
+};
+
+
+/**
+ * Add row to `people_social` table if not exist
+ *
+ * @param data { Object }
+ * @private
+ */
+let updateTablePeopleSocial_ = (data) => {
+    models.people_social.findOrCreate({
+        where: {
+            people_id: data.people_id,
+            site: data.site,
+            url: data.url
+        },
+        defaults: data
+    });
+};
+
+/**
+ * Add row to `people_scores` each time of scraping
+ *
+ * @param data { Object }
+ * @private
+ */
+let updateTablePeopleScore_ = (data) => {
+    return models.people_scores.create(data);
+};
+
+/**
+ * Update person information in table `people`
+ *
+ * @param personObj - { Object }
+ * @private
+ */
+let updateTablePeople_ = function (personObj) {
+
+    return models.people.findOrCreate({
         where: {id: personObj.id},
         defaults: personObj
     })
@@ -50,68 +135,76 @@ let updatePerson_ = function (personObj, score) {
                 };
 
                 person.updateAttributes(attributes);
-
             }
+            return "done";
         });
-
-    models.people_score.create(score);
 };
+
 
 /**
  * Save person photo to Folder
  * @param url - url of photo
  * @private
  */
-let savePersonPhoto_ = function(url) {
+let savePersonPhoto_ = function (url) {
     let name = url.split('images/')[1].split('/')[1];
     if (name !== "team") {
-        let folder = fs.createWriteStream('assets/people/' + name);
-        needle.get(url).pipe(folder);
+        if (!fs.existsSync(process.env.PEOPLE_IMAGES_PATH + name)) {
+            needle.get(url).pipe(fs.createWriteStream(process.env.PEOPLE_IMAGES_PATH + name));
+        }
     }
-
 };
+
 
 /**
  * Get all people from icoBench
+ *
+ * @param api - icoBench api
  * @private
  */
-let getAllPeople_ = function () {
-    let ico  = new icoBench(),
-        page = 0;
+let getAllPeople_ = function (api) {
 
-    let getPage_ = function () {
-        ico.get("people/all", data => {
-            if (process.env.NODE_ENV === "development")
-                logger.info('Getting from API: `https://icobench.com/people/all/' + page + '` from ' + data.pages);
-            if (data.results === undefined) {
-                setTimeout(() => {
-                    getPage_(page)
-                }, 1000)
-            } else {
-                for (let i = 0; i < data.results.length; i++) {
-                    savePersonPhoto_(data.results[i].photo);
-                    scraper.push(data.results[i]);
-                }
-                if (data.currentPage !== data.pages - 1) {
+    return new Promise(resolve => {
+        let page = 0;
+
+        let getPage_ = function () {
+            api.get("people/all", data => {
+                if (process.env.NODE_ENV === "development")
+                    logger.info('Getting from API: `https://icobench.com/people/all/' + page + '` from ' + data.pages);
+
+                if (data.error) {
                     getPage_(page++);
+                } else if (data.results === undefined) {
+                    setTimeout(() => { getPage_(page) }, 200)
                 } else {
-                    logger.info('Receive all people from source `https://icobench.com/people/all`.');
-                } 
-            }
-        }, {page: page});
-    };
+                    for (let i = 0; i < data.results.length; i++) {
+                        savePersonPhoto_(data.results[i].photo);
+                        scraper.push(data.results[i]);
+                    }
+                    if (data.currentPage !== data.pages - 1) {
+                        getPage_(page++);
+                    } else {
+                        logger.info('Receive all people from source `https://icobench.com/people/all`.');
+                        resolve();
+                    }
+                }
+            }, {page: page});
+        };
 
-    getPage_(page);
+        getPage_(page);
+    });
 };
 
+
 /**
- * Initialize scraping function
+ * Initialize scraping function for parsing people page
+ *
  * @private
  */
 let initScraper_ = function () {
     scraper = tress((object, callback) => {
         needle('get', object.url)
-            .then(response => {
+            .then(async response => {
                 let $ = cheerio.load(response.body);
 
                 let distribution = $("h3:contains('Rating distribution')").next(),
@@ -135,7 +228,7 @@ let initScraper_ = function () {
                     available_for += $(el).text().trim() + ((i < $('.links a').length - 1) ? "," : "");
                 });
 
-                updatePerson_({
+                await updateTablePeople_({
                     id: object.id === 0 ? object._id : object.id,
                     name: object.name,
                     title: object.title,
@@ -154,10 +247,13 @@ let initScraper_ = function () {
                     iss: iss !== "" ? iss : -1,
                     acceptance_score: acceptance_score !== "" ? acceptance_score : -1,
                     contribution_score: contribution_score !== "" ? contribution_score : -1
-                }, {
+                });
+
+                await updateTablePeopleScore_({
                     people_id: object.id === 0 ? object._id : object.id,
                     score: object.iss
                 });
+
                 callback();
             })
             .catch(error => {
@@ -170,15 +266,115 @@ let initScraper_ = function () {
 
 
 /**
+ * Get total ICOs number from `ICOs - All` API
+ *
+ * @param api - icoBench
+ * @returns {Promise}
+ * @private
+ */
+let getIcosTotal_ = (api) => {
+    return new Promise((resolve, reject) => {
+        let getData = () => {
+            api.get("icos/all", data => {
+                if (data.error) {
+                    return reject(data.error);
+                } else if (data.results === undefined) {
+                    setTimeout(() => { getData() }, 200)
+                } else {
+                    resolve(data.icos);
+                }
+            });
+        };
+        getData();
+    });
+};
+
+
+
+/**
+ * Get team from `ICO - Profile` API
+ *
+ * @param api - icoBench API
+ * @param id - ico ID
+ * @returns {Promise}
+ * @private
+ */
+let getTeamFromIco_ = function (api, id) {
+
+    return new Promise((resolve, reject) => {
+        let getData = () => {
+            api.get('ico/' + id, async data => {
+                if (process.env.NODE_ENV === "development")
+                    logger.info('Getting from API: `https://icobench.com/ico/' + data.id + '` from ' + total);
+
+                if (data.error) {
+                    return reject(data.error);
+                } else if (data.id === undefined) {
+                    setTimeout(() => { getData() }, 200)
+                } else {
+                    let team = data['team'];
+                    if (team.length) {
+                        for (let i in team) {
+                            let member = await findMemberIdByIco_(team[i]['name'], data['name']);
+                            if (member !== undefined) {
+                                await updateTablePeopleIcos_({
+                                    people_id: member['id'],
+                                    ico_name: data['name'],
+                                    title: team[i]['title'],
+                                    group: team[i]['group']
+                                });
+                                for (let j in team[i].socials) {
+                                    await updateTablePeopleSocial_({
+                                        people_id: member.id,
+                                        site: team[i]['socials'][j]['site'],
+                                        url :team[i]['socials'][j]['url']
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    resolve();
+                }
+            })
+        };
+        getData()
+    });
+};
+
+
+let doWork = async () => {
+    logger.info("People: initialize scraping");
+    counter = 0;
+    total = 0;
+    api = new icoBench();
+
+    await getAllPeople_(api);
+
+    total = await getIcosTotal_(api)
+        .catch(error => {
+            logger.error('ICOBench error: `' + error + '`. Getting from API: `https://icobench.com/icos/all`');
+            return 1000;
+        });
+
+    while (++counter <= total) {
+        await getTeamFromIco_(api, counter)
+            .catch(error => {
+                logger.error('ICOBench error: `' + error + '`. Getting from API: `https://icobench.com/ico/' + counter + '`');
+            });
+    }
+
+    counter = null;
+    total = null;
+    api = null;
+    logger.info("People: finished scraping");
+};
+
+/**
  * Scraping people every 24 hours
  * @private
  */
 let initPeople_ = function () {
-    logger.info("People scraper initialize");
     initScraper_();
-    getAllPeople_();
-
-    setInterval(getAllPeople_, 1000*60*60*24);
-};
-
-initPeople_();
+    doWork();
+    setInterval(doWork, 1000 * 60 * 60 * process.env.PEOPLE_SCRAPER_TIME);
+}();
