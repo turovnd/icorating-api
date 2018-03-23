@@ -173,7 +173,8 @@ let getAllPeople_ = function (api) {
                     logger.info('Getting from API: `https://icobench.com/people/all/' + page + '` from ' + data.pages);
 
                 if (data.error) {
-                    getPage_(page++);
+                    logger.error('ICOBench error: `' + data.error + '`. Getting from API: `https://icobench.com/icos/all/' + page + '` from ' + data.pages`');
+                    setTimeout(() => { getPage_(page) }, 200)
                 } else if (data.results === undefined) {
                     setTimeout(() => { getPage_(page) }, 200)
                 } else {
