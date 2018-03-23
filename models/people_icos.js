@@ -2,7 +2,7 @@ module.exports = function(sequelize, Sequelize) {
 
     'use strict';
 
-    let Model = sequelize.define('people_icos', {
+    let Model = sequelize.define('people_ico', {
 
         people_id: {
             type: Sequelize.INTEGER,

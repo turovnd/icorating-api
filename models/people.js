@@ -88,7 +88,7 @@ module.exports = function(sequelize, Sequelize) {
 
     Model.associate = function(models) {
         models.people.hasMany(models.people_scores, { as: "Scores" });
-        models.people.hasMany(models.people_icos, { as: "Icos" });
+        models.people.hasMany(models.people_ico, { as: "Icos" });
         models.people.hasMany(models.people_social, { as: "Social" });
     };
 

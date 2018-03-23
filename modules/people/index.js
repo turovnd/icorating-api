@@ -52,13 +52,13 @@ let findMemberIdByIco_ = (name, ico) => {
 
 
 /**
- * Add row to `people_icos` table if not exist
+ * Add row to `people_ico` table if not exist
  *
  * @param data { Object }
  * @private
  */
 let updateTablePeopleIcos_ = (data) => {
-    models.people_icos.findOrCreate({
+    models.people_ico.findOrCreate({
         where: {
             people_id: data.people_id,
             ico_name: data.ico_name
