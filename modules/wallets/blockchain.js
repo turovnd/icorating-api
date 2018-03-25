@@ -68,8 +68,6 @@ module.exports = async (address, last_block, total_value, current_value) => {
                         total_value += value;
                         current_value += value;
 
-                        console.log("IN",total_value,current_value, value, transaction.addr);
-
                         insertArray.push({
                             address: address,
                             hash: block.hash,
@@ -95,8 +93,6 @@ module.exports = async (address, last_block, total_value, current_value) => {
                     // OUT transaction
                     if (transaction.addr.toUpperCase() !== address.toUpperCase()) {
                         current_value -= value;
-
-                        console.log("OUT",total_value,current_value,value, transaction.addr);
 
                         insertArray.push({
                             address: address,
