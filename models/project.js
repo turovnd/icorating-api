@@ -18,20 +18,15 @@ module.exports = function(sequelize, Sequelize) {
         ticker: {
             type: Sequelize.TEXT,
             notEmpty: true
-        },
-
-        wallets: {
-            type: Sequelize.TEXT,
-            notEmpty: true
         }
 
     }, {
-        updatedAt: false,
         underscored: true
     });
 
     Model.associate = function(models) {
         models.projects.hasMany(models.projects_prices, { as: "Prices" });
+        models.projects.hasMany(models.project_wallet, { as: "Wallets" });
     };
 
     return Model;

@@ -2,15 +2,15 @@ module.exports = function(sequelize, Sequelize) {
 
     'use strict';
 
-    let Model = sequelize.define('transactions', {
+    let Model = sequelize.define('transaction_eth', {
 
         address: {
-            type: Sequelize.TEXT,
+            type: Sequelize.STRING,
             notEmpty: true
         },
 
         hash: {
-            type: Sequelize.TEXT,
+            type: Sequelize.STRING,
             notEmpty: true
         },
 
@@ -20,24 +20,21 @@ module.exports = function(sequelize, Sequelize) {
         },
 
         from: {
-            type: Sequelize.TEXT
+            type: Sequelize.STRING
         },
 
         to: {
-            type: Sequelize.TEXT
+            type: Sequelize.STRING
         },
 
         value: {
             type: Sequelize.DOUBLE
-        },
-
-        total_value: {
-            type: Sequelize.DOUBLE
-        },
+        }
 
     }, {
         timestamps: false,
-        underscored: true
+        underscored: true,
+        freezeTableName: true
     });
 
     return Model;

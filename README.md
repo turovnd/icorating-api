@@ -46,6 +46,8 @@ PEOPLE_IMAGES_PATH=/tmp/
 
 # Time in hours
 PEOPLE_SCRAPER_TIME=24
+WALLETS_SCRAPER_TIME=12
+HYPESCORE_SCRAPER_TIME=24
 ```
 - Установите зависимости npm:
 ```

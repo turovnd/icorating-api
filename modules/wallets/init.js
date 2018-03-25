@@ -3,7 +3,6 @@ const logger     = require('../logger')();
 
 try {
     models.sequelize.sync().then(() => {
-        logger.info("Wallets scraper initialize");
         require('./index').init();
     });
 } catch (error) {

@@ -131,7 +131,7 @@ let updateIcoScoresFromRequest_ = async function (ico) {
  */
 let initHypeScore_ = async function () {
     await updateIcoScores_();
-    setInterval(updateIcoScores_, 1000*60*60*24);
+    setInterval(updateIcoScores_,1000 * 60 * 60 * process.env.HYPESCORE_SCRAPER_TIME);
 };
 
 module.exports = {

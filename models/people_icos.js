@@ -21,8 +21,7 @@ module.exports = function(sequelize, Sequelize) {
         }
 
     }, {
-        createdAt: false,
-        updatedAt: false,
+        timestamps: false,
         underscored: true
     });
 
