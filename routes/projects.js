@@ -24,11 +24,11 @@ const deleteWallets_ = async (newWallets, wallets) => {
         address = wallet.getDataValue('address');
         type    = wallet.getDataValue('type');
 
-        // delete wallet
-        await wallet.destroy();
-
         // IF wallet was deleted
         if (newWallets.indexOf(address) === -1) {
+
+            // delete wallet
+            await wallet.destroy();
 
             // check if another wallets have same address
             sameAddress = await models.project_wallet.findOne({ where: { address: address } });
