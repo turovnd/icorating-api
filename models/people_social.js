@@ -18,7 +18,8 @@ module.exports = function(sequelize, Sequelize) {
 
     }, {
         timestamps: false,
-        underscored: true
+        underscored: true,
+        freezeTableName: true
     });
 
     return Model;
