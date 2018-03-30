@@ -15,7 +15,7 @@ module.exports = (name) => {
         })
         .catch(error => {
             logger.error('Mainrest: could not load page: `' + url + '`. ' + error);
-            return -1;
+            return -2;
         });
 
 };

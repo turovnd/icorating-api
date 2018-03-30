@@ -2,9 +2,13 @@ const logger = require('../logger')();
 const axios  = require('axios');
 
 let countFollowers_ = function (pageName) {
-    if (pageName === "" || pageName === null || pageName === undefined) {
+    if (pageName === "" || pageName === null || pageName === undefined)
         return -1;
-    }
+
+    if (pageName.search(/https:\/\/medium.com\/@/) !== -1)
+        pageName = pageName.split('https://medium.com/')[1];
+
+    pageName = pageName.replace(/\//g, '');
 
     let url = 'https://medium.com/' + pageName + '/?format=json';
 
@@ -16,7 +20,7 @@ let countFollowers_ = function (pageName) {
         })
         .catch(error => {
             logger.error("Medium: error occur on getting followers count: `" + url + "`. " + error);
-            return -1;
+            return -2;
         });
 };
 

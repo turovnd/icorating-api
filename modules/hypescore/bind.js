@@ -23,7 +23,7 @@ module.exports = (string) => {
         })
         .catch(error => {
             logger.error('Bing request count error on load page: `' + url + '`. ' + error);
-            return -1;
+            return -2;
         });
 
 };

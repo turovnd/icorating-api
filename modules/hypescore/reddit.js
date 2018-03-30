@@ -2,9 +2,13 @@ const logger = require('../logger')();
 const axios  = require('axios');
 
 let countFollowers_ = function (pageName) {
-    if (pageName === "" || pageName === null || pageName === undefined) {
+    if (pageName === "" || pageName === null || pageName === undefined)
         return -1;
-    }
+
+    if (pageName.search(/https:\/\/www.reddit.com\/r\//) !== -1)
+        pageName = pageName.split('https://www.reddit.com/r/')[1];
+
+    pageName = pageName.replace(/\//g, '');
 
     let url = 'https://www.reddit.com/r/' + pageName + '/about.json';
 
@@ -14,7 +18,7 @@ let countFollowers_ = function (pageName) {
         })
         .catch(error => {
             logger.error("Reddit: error occur on getting followers count: `" + url + "`. " + error);
-            return -1;
+            return -2;
         });
 };
 

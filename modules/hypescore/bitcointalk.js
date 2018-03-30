@@ -15,14 +15,23 @@ let countFollowers_ = function (url) {
         })
         .catch(error => {
             logger.error("Bitcontalk: error occur on getting followers count: `" + url + "`. " + error);
-            return -1;
+            return -2;
         });
 };
 
 let getPage_ = function (topic) {
-    if (topic === "" || topic === null || topic === undefined) {
+    if (topic === "" || topic === null || topic === undefined)
         return -1;
-    }
+
+    if (topic.search(/https:\/\/bitcointalk.org\/index.php\?topic=/) === -1)
+        return -1;
+
+    topic = topic.split('topic=')[1];
+
+    if (topic.search(/./) !== -1)
+        topic = topic.split('.')[0];
+
+    topic = topic.replace(/[^0-9]/g, '');
 
     let url = 'https://bitcointalk.org/index.php?topic=' + topic + '.0';
 
@@ -39,7 +48,7 @@ let getPage_ = function (topic) {
         })
         .catch(error => {
             logger.error("Bitcontalk: error occur on getting page: `" + url + "`. " + error);
-            return -1;
+            return -2;
         });
 };
 

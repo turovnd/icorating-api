@@ -28,7 +28,7 @@ module.exports = (website) => {
         })
         .catch(error => {
             logger.error('Total visits error on load page: `' + website + '`. ' + error);
-            return -1;
+            return -2;
         });
 
 };
