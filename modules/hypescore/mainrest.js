@@ -7,11 +7,11 @@ module.exports = (name) => {
         return -1;
     }
 
-    let url = 'http://rss.mainrest.ru/keyword/' + process.env.MAINREST_GROUP + '/'+ name;
+    let url = 'https://api.ventanalytics.ru/mainrest/keywords?login=' + process.env.MAINREST_GROUP + '&word='+ name;
 
     return axios.get(url)
         .then(response => {
-            return parseInt(response.data.count);
+            return parseInt(response.data.data);
         })
         .catch(error => {
             logger.error('Mainrest: could not load page: `' + url + '`. ' + error);
