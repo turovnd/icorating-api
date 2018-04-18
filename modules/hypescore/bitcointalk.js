@@ -42,6 +42,8 @@ let getPage_ = function (topic) {
 
             if (table.length === 0) {
                 return -1;
+            } else if ($(table[0]).find('.prevnext').prev().attr('href') === undefined) {
+                return countFollowers_(url);
             } else {
                 return countFollowers_($(table[0]).find('.prevnext').prev().attr('href'));
             }

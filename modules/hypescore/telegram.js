@@ -10,7 +10,7 @@ let getChatMembersCount_ = function (chat_id) {
         return -1;
 
     if (chat_id.search(/https:\/\/t.me\//) !== -1)
-        chat_id = "@" + chat_id.split('https://t.me/')[1];
+        chat_id = chat_id.split('https://t.me/')[1];
 
     if (chat_id.search(/@/) === -1)
         chat_id = "@" + chat_id;
