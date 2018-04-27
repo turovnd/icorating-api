@@ -1,9 +1,15 @@
 const logger   = require('../logger')();
 const telegram = require('telegram-bot-api');
-
+const timeout = ms => new Promise(res => setTimeout(res, ms))
 const api = new telegram({
     token: process.env.TELEGRAM_TOKEN
 });
+
+// Чтобы избежать FloodWait
+async function delayCall (handler, time) {
+    await timeout(time);
+    return handler.apply()
+}
 
 let getChatMembersCount_ = function (chat_id) {
     if (chat_id === "" || chat_id === null || chat_id === undefined)
@@ -17,7 +23,8 @@ let getChatMembersCount_ = function (chat_id) {
 
     chat_id = chat_id.replace(/\//g, '');
 
-    return api.getChatMembersCount({
+    return delayCall(function(){
+        return api.getChatMembersCount({
             chat_id: chat_id
         }).then(data => {
             return data;
@@ -25,7 +32,8 @@ let getChatMembersCount_ = function (chat_id) {
             logger.error("Telegram: error occur on getting chat members count: `" + chat_id + "`. " + err.message);
             return -2;
         })
-};
+    }, 300);
+}
 
 module.exports = {
     countChatMembers: getChatMembersCount_

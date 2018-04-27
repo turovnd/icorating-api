@@ -22,6 +22,9 @@ let countFollowers_ = function (url) {
 let getPage_ = function (topic) {
     if (topic === "" || topic === null || topic === undefined)
         return -1;
+    if( !isNaN(parseFloat(topic))){
+        topic = 'https://bitcointalk.org/index.php?topic='+parseFloat(topic)+'.0';
+    }
 
     if (topic.search(/https:\/\/bitcointalk.org\/index.php\?topic=/) === -1)
         return -1;

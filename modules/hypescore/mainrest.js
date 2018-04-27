@@ -7,6 +7,10 @@ module.exports = (name) => {
         return -1;
     }
 
+    let tokenString = /\((.*)\)/;
+    let domainString = /\.(\w*)\s/;
+    name = name.replace(tokenString,'').replace(domainString,'').replace(/\s/,'');
+
     let url = 'https://api.ventanalytics.ru/mainrest/keywords?login=' + process.env.MAINREST_GROUP + '&word='+ name;
 
     return axios.get(url)

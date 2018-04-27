@@ -6,6 +6,9 @@ module.exports = (string) => {
     if (string === "" || string === null || string === undefined) {
         return -1;
     }
+    let tokenString = /\((.*)\)/;
+    let domainString = /\.(\w*)\s/;
+    string = string.replace(tokenString,'').replace(domainString,'').replace(/\s/,'');
 
     let url = "https://api.cognitive.microsoft.com/bing/v7.0/search?q=" + string + "+ico(-site:mybit.io)";
 
