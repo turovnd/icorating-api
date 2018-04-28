@@ -21,7 +21,7 @@ let countFollowers_ = function (url) {
 
 let getPage_ = function (topic) {
     if (topic === "" || topic === null || topic === undefined)
-        return -2;
+        return -1;
 
     if (topic.search(/https:\/\/bitcointalk.org\/index.php\?/) !== -1)
         topic = topic.split("https://bitcointalk.org/index.php?")[1];
@@ -32,7 +32,10 @@ let getPage_ = function (topic) {
     if (topic.search(/./) !== -1)
         topic = topic.split('.')[0];
 
-    topic = topic.replace(/[^0-9]/g, '');
+    if( !isNaN(parseInt(topic)) )
+        topic = parseInt(topic);
+    else
+        topic = topic.replace(/[^0-9]/g, '');
 
     let url = 'https://bitcointalk.org/index.php?topic=' + topic + '.0';
 
