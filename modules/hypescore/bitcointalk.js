@@ -8,7 +8,7 @@ let countFollowers_ = function (url) {
             let $ = cheerio.load(response.data),
                 topics = $('.message_number');
             if (topics.length === 0) {
-                return -1;
+                return -2;
             } else {
                 return parseInt($(topics[topics.length-1]).text().replace(/[^0-9.]/g, ''));
             }
@@ -21,12 +21,13 @@ let countFollowers_ = function (url) {
 
 let getPage_ = function (topic) {
     if (topic === "" || topic === null || topic === undefined)
-        return -1;
+        return -2;
 
-    if (topic.search(/https:\/\/bitcointalk.org\/index.php\?topic=/) === -1)
-        return -1;
+    if (topic.search(/https:\/\/bitcointalk.org\/index.php\?/) !== -1)
+        topic = topic.split("https://bitcointalk.org/index.php?")[1];
 
-    topic = topic.split('topic=')[1];
+    if (topic.search(/topic=/) !== -1)
+        topic = topic.split('topic=')[1];
 
     if (topic.search(/./) !== -1)
         topic = topic.split('.')[0];
@@ -41,7 +42,7 @@ let getPage_ = function (topic) {
                 table = $('#bodyarea').find('> table');
 
             if (table.length === 0) {
-                return -1;
+                return -2;
             } else if ($(table[0]).find('.prevnext').prev().attr('href') === undefined) {
                 return countFollowers_(url);
             } else {

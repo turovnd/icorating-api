@@ -52,11 +52,11 @@ let insertScoreToDB_ = function (score) {
 
             for (let field in score) {
                 if (score[field] === null || isNaN(score[field])) {
-                    score[field] = -1;
+                    score[field] = -2;
                 }
 
                 if (oldscore !== null) {
-                    if (score[field] === -1 && oldscore.getDataValue(field) !== -1) {
+                    if ((score[field] === -1 || score[field] === -2) && !(oldscore.getDataValue(field) === -1 || oldscore.getDataValue(field) === -2)) {
                         score[field] = oldscore.getDataValue(field);
                     }
                 }
@@ -131,7 +131,7 @@ let updateIcoScoresFromRequest_ = async function (ico) {
  */
 let initHypeScore_ = async function () {
     await updateIcoScores_();
-    setInterval(updateIcoScores_,1000 * 60 * 60 * process.env.HYPESCORE_SCRAPER_TIME);
+    setInterval(updateIcoScores_, 1000 * 60 * 60 * process.env.HYPESCORE_SCRAPER_TIME);
 };
 
 module.exports = {
