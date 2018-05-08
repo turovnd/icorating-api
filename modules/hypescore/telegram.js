@@ -1,17 +1,36 @@
 const logger   = require('../logger')();
 const telegram = require('telegram-bot-api');
 const timeout = ms => new Promise(res => setTimeout(res, ms))
-const api = new telegram({
-    token: process.env.TELEGRAM_TOKEN
-});
+const telegramTokens =  process.env.TELEGRAM_TOKEN.split(' ');
 
-// Чтобы избежать FloodWait
-async function delayCall (handler, time) {
-    await timeout(time);
-    return handler.apply()
+var tokenIndex = 0;
+var apiInstance = false;
+var retry = 0;
+
+function getApiInstance(){
+    if(!apiInstance) apiInstance = newApiInstance();
+    return apiInstance;
 }
 
+function newApiInstance(){
+
+    let token =  telegramTokens[tokenIndex];
+    let instance = false;
+    logger.info("New telegram api instance token: " + token);
+    instance = new telegram({
+        token: token
+    });
+    tokenIndex ++;
+    if(telegramTokens[tokenIndex] == null){
+        tokenIndex = 0;
+    }
+    return instance;
+}
+
+
+
 let getChatMembersCount_ = function (chat_id) {
+
     if (chat_id === "" || chat_id === null || chat_id === undefined)
         return -1;
 
@@ -23,16 +42,29 @@ let getChatMembersCount_ = function (chat_id) {
 
     chat_id = chat_id.replace(/\//g, '');
 
-    return delayCall(function(){
-        return api.getChatMembersCount({
-            chat_id: chat_id
-        }).then(data => {
-            return data;
-        }).catch(err => {
-            logger.error("Telegram: error occur on getting chat members count: `" + chat_id + "`. " + err.message);
+    return getApiInstance().getChatMembersCount({
+        chat_id: chat_id
+    }).then(data => {
+        retry = 0;
+        return data;
+    }).catch(err => {
+        if(err.statusCode == 429){
+
+            if(retry < 2){
+                apiInstance = false;
+                getChatMembersCount_(chat_id);
+            }else{
+                retry = 0;
+                logger.error("Telegram: error occur on getting chat members count: `" + chat_id + "`. " +  err.message);
+                return -2;
+            }
+            retry ++;
+        }else{
+            logger.error("Telegram: error occur on getting chat members count: `" + chat_id + "`. " +  err.message);
             return -2;
-        })
-    }, 300);
+        }
+
+    })
 }
 
 module.exports = {
