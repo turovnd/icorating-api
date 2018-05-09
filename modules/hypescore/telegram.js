@@ -2,12 +2,18 @@ const logger   = require('../logger')();
 const telegram = require('telegram-bot-api');
 const timeout = ms => new Promise(res => setTimeout(res, ms))
 const telegramTokens =  process.env.TELEGRAM_TOKEN.split(' ');
+const perBotRequestLimit = 180;
 
 var tokenIndex = 0;
 var apiInstance = false;
+var requestCount = 0;
 var retry = 0;
 
 function getApiInstance(){
+    if(requestCount >= perBotRequestLimit ){
+        requestCount = 0;
+        return  apiInstance = newApiInstance();
+    }
     if(!apiInstance) apiInstance = newApiInstance();
     return apiInstance;
 }
@@ -27,9 +33,8 @@ function newApiInstance(){
     return instance;
 }
 
-
-
 let getChatMembersCount_ = function (chat_id) {
+    requestCount++;
 
     if (chat_id === "" || chat_id === null || chat_id === undefined)
         return -1;
