@@ -46,10 +46,10 @@ let getPage_ = function (topic) {
 
             if (table.length === 0) {
                 return -2;
-            } else if ($(table[0]).find('.prevnext').prev().attr('href') === undefined) {
+            } else if ($('#bodyarea').find('.prevnext').prev().attr('href') === undefined) {
                 return countFollowers_(url);
             } else {
-                return countFollowers_($(table[0]).find('.prevnext').prev().attr('href'));
+                return countFollowers_($('#bodyarea').find('.prevnext').prev().attr('href'));
             }
         })
         .catch(error => {
