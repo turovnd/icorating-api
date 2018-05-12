@@ -4,8 +4,18 @@ require('dotenv').config();
 const fs        = require("fs");
 const path      = require("path");
 const Sequelize = require("sequelize");
-const sequelize = new Sequelize("mysql://" + process.env.DB_USER + ":" + process.env.DB_PASSWORD + "@" + process.env.DB_HOST + ":" + process.env.DB_PORT + "/" + process.env.DB_DATABASE, { logging: false, define: { charset: 'utf8', collate: 'utf8_general_ci'} });
-
+const sequelize = new Sequelize(
+    process.env.DB_DATABASE,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+    {
+        host: process.env.DB_HOST,
+        dialect: 'mysql',
+        logging: false,
+        freezeTableName: true,
+        operatorsAliases: false
+    }
+)
 let db = {};
 
 fs

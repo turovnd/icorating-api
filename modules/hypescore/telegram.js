@@ -53,6 +53,7 @@ let getChatMembersCount_ = function (chat_id) {
         retry = 0;
         return data;
     }).catch(err => {
+        logger.error("error with ", chat_id, " ",err)
         if(err.statusCode == 429){
 
             if(retry < 2){
@@ -60,12 +61,12 @@ let getChatMembersCount_ = function (chat_id) {
                 getChatMembersCount_(chat_id);
             }else{
                 retry = 0;
-                logger.error("Telegram: error occur on getting chat members count: `" + chat_id + "`. " +  err.message);
+                logger.error("Telegram: error "+err.statusCode+"occur on getting chat members count: `" + chat_id + "`. " +  err.message);
                 return -2;
             }
             retry ++;
         }else{
-            logger.error("Telegram: error occur on getting chat members count: `" + chat_id + "`. " +  err.message);
+            logger.error("Telegram: error "+err.statusCode+"occur on getting chat members count: `" + chat_id + "`. " +  err.message);
             return -2;
         }
 
