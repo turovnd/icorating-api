@@ -2,7 +2,7 @@
 const models    = require('../../models');
 const { Op } = require('sequelize')
 const moment = require('moment')
-const logger = require('logger')
+const logger   = require('../logger')();
 /**
  * Get all ICOs from DB
  * @private
