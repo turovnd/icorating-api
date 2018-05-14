@@ -1,6 +1,8 @@
 'use strict';
 const models    = require('../../models');
-
+const { Op } = require('sequelize')
+const moment = require('moment')
+const logger = require('logger')
 /**
  * Get all ICOs from DB
  * @private
@@ -10,6 +12,46 @@ let getAllIcos_ = function () {
     return models.icos.findAll({
         order: [["created_at", 'DESC']]
     })
+        .then(allicos => {
+
+            return allicos.map(ico => {
+
+                return Object.assign(
+                    {},
+                    {
+                        id:             ico.getDataValue('id'),
+                        name:           ico.getDataValue('name'),
+                        website:        ico.getDataValue('website'),
+                        telegram:       ico.getDataValue('telegram'),
+                        bitcointalk:    ico.getDataValue('bitcointalk'),
+                        twitter:        ico.getDataValue('twitter'),
+                        facebook:       ico.getDataValue('facebook'),
+                        reddit:         ico.getDataValue('reddit'),
+                        medium:         ico.getDataValue('medium'),
+                        admin_score:    ico.getDataValue('admin_score'),
+                        updated_at:     ico.getDataValue('updated_at'),
+                        created_at:     ico.getDataValue('created_at')
+                    }
+                );
+
+            });
+
+        });
+
+};
+/**
+ * Get Not Finished YET ICOs from DB
+ * @private
+ */
+let getNotFinishedIcos_ = function () {
+
+    return models.icos.findAll({
+        where:{
+            "end_date": {
+                [Op.gte]: moment().subtract(1, 'days').toDate()
+            }},
+        order: [["created_at", 'DESC']]}
+    )
         .then(allicos => {
 
             return allicos.map(ico => {
@@ -102,13 +144,23 @@ let update_ = async function (ico) {
  * @private
  */
 let updateIcoScores_ = async function () {
-    let icos = await getAllIcos_();
+    let icos = await getNotFinishedIcos_();
+    var count = 0
+    var counted = 0
 
+    logger.info("we received '", icos.length, "' icos")
     if (icos.length > 0) {
         for (let i in icos) {
-            await update_(icos[i]);
+            let scores = await update_(icos[i]);
+            count ++
+            if (scores.telegram > 0) {
+                counted ++
+            }
+            logger.info(icos[i].name, " current score: ",scores.telegram, "  - ", count, " of ", icos.length)
         }
     }
+    logger.info("got data for ", counted, " of ",icos.length, " icos ")
+
 };
 
 

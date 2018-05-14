@@ -47,6 +47,9 @@ module.exports = function(sequelize, Sequelize) {
         admin_score: {
             type: Sequelize.INTEGER
         },
+        created_at: {
+            type: Sequelize.DATE
+        }
 
     }, {
         underscored: true
