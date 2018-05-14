@@ -49,6 +49,9 @@ module.exports = function(sequelize, Sequelize) {
         },
         created_at: {
             type: Sequelize.DATE
+        },
+        end_date: {
+            type: Sequelize.DATE
         }
 
     }, {
