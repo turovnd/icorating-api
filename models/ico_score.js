@@ -53,7 +53,7 @@ module.exports = function(sequelize, Sequelize) {
             type: Sequelize.INTEGER
         },
         alexa_rank: {
-            type: Sequelize.STRING
+            type: Sequelize.INTEGER
         }
 
     }, {
