@@ -33,23 +33,27 @@ let countFollowers_ = function (pageName) {
 };
 
 let countRank_ = function(ico){
-    client({
-        'Action': 'UrlInfo',
-        'Url': url.parse(ico).hostname,
-        'ResponseGroup': 'Related,TrafficData,ContentData'
-    }, function (err, data) {
 
-        if (err){
-            return -1
+    return new Promise(function(resolve, reject) {
+        client({
+            'Action': 'UrlInfo',
+            'Url': url.parse(ico).hostname,
+            'ResponseGroup': 'Related,TrafficData,ContentData'
+        }, function (err, data) {
 
-        }else{
-            if(typeof data === "undefined" || typeof data.trafficData === "undefined"
-                || !data.trafficData.hasOwnProperty("rank")){
+            if (err) {
+                return -1
+
+            } else {
+                if (typeof data === "undefined" || typeof data.trafficData === "undefined"
+                    || !data.trafficData.hasOwnProperty("rank")) {
                     return -2;
                 }
-            return data.trafficData.rank
-        }
-    });
+
+                resolve( parseInt(data.trafficData.rank))
+            }
+        });
+    })
 }
 
 let countDayRates_ = function(ico){

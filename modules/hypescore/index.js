@@ -136,7 +136,7 @@ let update_ = async function (ico) {
         hype_score  : 0,
         created_at: new Date()
     };
-
+    
     await insertScoreToDB_(scores);
 
     return scores;
