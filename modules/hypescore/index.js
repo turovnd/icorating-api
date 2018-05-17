@@ -154,7 +154,7 @@ let updateIcoScores_ = async function () {
     if (icos.length > 0) {
         for (let i in icos) {
             count ++;
-            if(count > 20 ) continue;
+            // if(count > 20 ) continue;
             let scores = await update_(icos[i]);
 
 
