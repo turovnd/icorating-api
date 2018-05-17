@@ -39,6 +39,7 @@ let getChatMembersCount_ = function (chat_id) {
     if (chat_id === "" || chat_id === null || chat_id === undefined)
         return -1;
 
+
     if (chat_id.search(/https:\/\/t.me\//) !== -1)
         chat_id = chat_id.split('https://t.me/')[1];
 
@@ -61,12 +62,14 @@ let getChatMembersCount_ = function (chat_id) {
                 getChatMembersCount_(chat_id);
             }else{
                 retry = 0;
-                logger.error("Telegram: error "+err.statusCode+"occur on getting chat members count: `" + chat_id + "`. " +  err.message);
+                logger.error("Telegram: error "+err+"occur on getting chat members count: `" + chat_id + "`. " +  err.message);
                 return -2;
             }
             retry ++;
         }else{
+
             logger.error("Telegram: error "+err.statusCode+"occur on getting chat members count: `" + chat_id + "`. " +  err.message);
+            logger.error(err);
             return -2;
         }
 

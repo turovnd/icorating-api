@@ -50,7 +50,8 @@ let getNotFinishedIcos_ = function () {
             "end_date": {
                 [Op.gte]: moment().subtract(1, 'days').toDate()
             }},
-        order: [["created_at", 'DESC']]}
+        order: [["created_at", 'DESC']]
+        , logging: console.log}
     )
         .then(allicos => {
 
@@ -129,6 +130,8 @@ let update_ = async function (ico) {
         bing        : await require('./bind')(ico.name, ico.website),
         total_visits: await require('./total_visits')(ico.website),
         mentions    : await require('./mainrest')(ico.name),
+        alexa_rank   : await require('./alexa').countRank(ico.website),
+        // month_alexa_rate : await require('./alexa').countMonthRates(ico.website),
         admin_score : 0,
         hype_score  : 0,
         created_at: new Date()
@@ -145,22 +148,33 @@ let update_ = async function (ico) {
  */
 let updateIcoScores_ = async function () {
     let icos = await getNotFinishedIcos_();
-    var count = 0
-    var counted = 0
+    var count = 0, counted = 0, minusone = 0, minustwo = 0;
 
     logger.info("we received '", icos.length, "' icos")
     if (icos.length > 0) {
         for (let i in icos) {
+            count ++;
+            if(count > 20 ) continue;
             let scores = await update_(icos[i]);
-            count ++
-            if (scores.telegram > 0) {
-                counted ++
+
+
+            switch (scores.telegram){
+                case 0:
+                    counted ++;
+                    break;
+                case -1:
+                    minusone ++;
+                    break;
+                case -2:
+                    minustwo ++;
+                    break;
+                default:
+                    // console.log(icos[i])
             }
             logger.info(icos[i].name, " current score: ",scores.telegram, "  - ", count, " of ", icos.length)
         }
     }
-    logger.info("got data for ", counted, " of ",icos.length, " icos ")
-
+    logger.info("got data for ", counted, " of ",icos.length, " icos, errored one", minusone, " minus two ", minustwo)
 };
 
 

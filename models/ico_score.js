@@ -52,6 +52,9 @@ module.exports = function(sequelize, Sequelize) {
         hype_score: {
             type: Sequelize.INTEGER
         },
+        alexa_rank: {
+            type: Sequelize.STRING
+        }
 
     }, {
         updatedAt: false,

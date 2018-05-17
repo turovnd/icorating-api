@@ -25,6 +25,7 @@
     "dev:api": "nodemon server.js"
   },
   "dependencies": {
+    "awis": "^1.0.10",
     "axios": "^0.17.1",
     "body-parser": "~1.18.2",
     "cheerio": "^1.0.0-rc.2",
@@ -40,6 +41,7 @@
     "path": "^0.12.7",
     "request": "^2.83.0",
     "sequelize": "^4.33.0",
+    "sequelize-cli": "^4.0.0",
     "telegram-bot-api": "^1.2.0",
     "tress": "^1.0.5",
     "winston": "^2.4.0"
