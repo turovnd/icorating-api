@@ -136,7 +136,6 @@ let update_ = async function (ico) {
         hype_score  : 0,
         created_at: new Date()
     };
-    
     await insertScoreToDB_(scores);
 
     return scores;
@@ -148,33 +147,14 @@ let update_ = async function (ico) {
  */
 let updateIcoScores_ = async function () {
     let icos = await getNotFinishedIcos_();
-    var count = 0, counted = 0, minusone = 0, minustwo = 0;
 
-    logger.info("we received '", icos.length, "' icos")
+    logger.info("started '", icos.length, "' icos")
     if (icos.length > 0) {
         for (let i in icos) {
-            count ++;
-            // if(count > 20 ) continue;
-            let scores = await update_(icos[i]);
-
-
-            switch (scores.telegram){
-                case 0:
-                    counted ++;
-                    break;
-                case -1:
-                    minusone ++;
-                    break;
-                case -2:
-                    minustwo ++;
-                    break;
-                default:
-                    // console.log(icos[i])
-            }
-            logger.info(icos[i].name, " current score: ",scores.telegram, "  - ", count, " of ", icos.length)
+            await update_(icos[i]);
         }
     }
-    logger.info("got data for ", counted, " of ",icos.length, " icos, errored one", minusone, " minus two ", minustwo)
+    logger.info(icos.length," finished")
 };
 
 
