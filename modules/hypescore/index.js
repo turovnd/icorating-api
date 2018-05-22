@@ -149,10 +149,21 @@ let updateIcoScores_ = async function () {
     let icos = await getNotFinishedIcos_();
 
     logger.info("started '", icos.length, "' icos")
+    var nC = 0, c = 0, c2 = 0;
     if (icos.length > 0) {
         for (let i in icos) {
-            await update_(icos[i]);
+            var res = await update_(icos[i]);
+
+            if(res.facebook === -1){
+                nC++;
+            }else if(res.facebook === -2){
+                c2++;
+            }else{
+                c++
+            }
         }
+        logger.info("finished with success ",c, " and empty ",nC, " and not founded",c2)
+
     }
 };
 
