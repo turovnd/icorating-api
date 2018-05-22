@@ -154,7 +154,6 @@ let updateIcoScores_ = async function () {
             await update_(icos[i]);
         }
     }
-    logger.info(icos.length," finished")
 };
 
 

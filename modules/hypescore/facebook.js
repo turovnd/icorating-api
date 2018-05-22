@@ -11,6 +11,9 @@ let countFollowers_ = function (pageName) {
         pageName = pageName.split('https://www.facebook.com/')[1];
 
     pageName = pageName.replace(/\//g, '');
+    if (pageName.charAt(0) === "h"){
+        pageName = pageName.substr(1);
+    }
 
     return new Promise((resolve, reject) => {
             facebook.api('/' + pageName + '/?fields=fan_count', (err, data) => {
