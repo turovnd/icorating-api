@@ -25,7 +25,12 @@ let countRank_ = function(ico){
                     || !data.trafficData.hasOwnProperty("rank")) {
                     resolve( -1 );
                 }
-                resolve( parseInt(data.trafficData.rank))
+
+                if (isNaN(parseInt(data.trafficData.rank))){
+                    resolve( -2 );
+                }else{
+                    resolve( parseInt(data.trafficData.rank))
+                }
             }
         });
     })
@@ -49,7 +54,6 @@ let countDayRates_ = function(ico){
 
         }
 
-        // ...
     });
 }
 
