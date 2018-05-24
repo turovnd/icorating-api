@@ -14,6 +14,16 @@ let countFollowers_ = function (pageName) {
 
     return axios.get(url)
         .then(response => {
+            if(response.data.hasOwnProperty('success') && response.data.success === false){
+                if(response.data.error.search("blacklisted") !== -1){
+                    return -4
+                }
+                if(response.data.error.search("deactivated") !== -1){
+                    return -5
+                }
+
+            }
+
             let data = JSON.parse(response.data.substring(response.data.search('{'), response.data.length)),
                 userId = data.payload.user.userId;
             return parseInt(data['payload']['references']['SocialStats'][userId]['usersFollowedByCount']);

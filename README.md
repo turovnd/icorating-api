@@ -79,3 +79,10 @@ npm run prod:<module>:<option>
 - притяните изменения с github: `git pull origin`
 - обновите зависимости `npm`: `npm update`
 - запустите скрипт
+
+## Дополнительные коды ошибок
+    Reddit
+        -3 - статус пользователя listing
+    Medium
+        -4 - статус пользователя blacklisted
+        -5 - статус пользователя deactivated/deleted

@@ -2,6 +2,7 @@ const logger = require('../logger')();
 const axios  = require('axios');
 
 let countFollowers_ = function (pageName) {
+
     if (pageName === "" || pageName === null || pageName === undefined)
         return -1;
 
@@ -14,6 +15,12 @@ let countFollowers_ = function (pageName) {
 
     return axios.get(url)
         .then(response => {
+            if(response.hasOwnProperty('data') &&
+                response.data.hasOwnProperty('data') &&
+                !response.data.data.hasOwnProperty('subscribers'))
+            {
+                return -3
+            }
             return parseInt(response.data.data.subscribers)
         })
         .catch(error => {
