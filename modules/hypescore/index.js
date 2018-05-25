@@ -45,33 +45,57 @@ let getAllIcos_ = function () {
  */
 let getNotFinishedIcos_ = function () {
 
-    return models.icos.findAll({
-        where:{
-            "end_date": {
-                [Op.gte]: moment().subtract(1, 'days').toDate()
-            }},
-        order: [["created_at", 'DESC']]
-        , logging: console.log}
-    )
+    const Sequelize = require("sequelize");
+    const sequelize = new Sequelize(
+        process.env.DB_PROD_DATABASE,
+        process.env.DB_PROD_USER,
+        process.env.DB_PROD_PASSWORD,
+        {
+            host: process.env.DB_PROD_HOST,
+            dialect: 'mysql',
+            logging: false,
+            freezeTableName: true,
+            operatorsAliases: false
+        }
+    );
+    // return models.icos.findAll({
+    //     where:{
+    //         "end_date": {
+    //             [Op.gte]: moment().subtract(1, 'days').toDate()
+    //         }},
+    //     order: [["created_at", 'DESC']]
+    //     , logging: console.log}
+    // )
+    return sequelize.query(`SELECT ico_descriptions.ico_id as id, ico_crowdsales.end_date_ico, ico_descriptions.name, ico_links.site, ico_links.btctalk, ico_links.linkedin, ico_links.twitter, ico_links.facebook, ico_links.instagram, ico_links.telegram, ico_links.blog, ico_links.email, ico_links.youtube, ico_links.steemit, ico_links.reddit, ico_links.medium, ico_links.github, ico_links.slack, ico_links.google_market, ico_links.apple_store
+    FROM ico_descriptions
+    INNER JOIN ico_crowdsales on ico_descriptions.ico_id = ico_crowdsales.ico_id
+    INNER JOIN ico_links on ico_descriptions.ico_id = ico_links.ico_id where ico_crowdsales.end_date_ico >= CURDATE()`)
         .then(allicos => {
+            return allicos[0].map(ico => {
 
-            return allicos.map(ico => {
+                var telegram = ico.telegram ? ico.telegram : '',
+                    btctalk = ico.btctalk ? ico.btctalk : '',
+                    twitter = ico.twitter ? ico.twitter : '',
+                    facebook = ico.facebook ? ico.facebook : '',
+                    reddit = ico.reddit ? ico.reddit : '',
+                    medium = ico.medium ? ico.medium : '';
+
 
                 return Object.assign(
                     {},
                     {
-                        id:             ico.getDataValue('id'),
-                        name:           ico.getDataValue('name'),
-                        website:        ico.getDataValue('website'),
-                        telegram:       ico.getDataValue('telegram'),
-                        bitcointalk:    ico.getDataValue('bitcointalk'),
-                        twitter:        ico.getDataValue('twitter'),
-                        facebook:       ico.getDataValue('facebook'),
-                        reddit:         ico.getDataValue('reddit'),
-                        medium:         ico.getDataValue('medium'),
-                        admin_score:    ico.getDataValue('admin_score'),
-                        updated_at:     ico.getDataValue('updated_at'),
-                        created_at:     ico.getDataValue('created_at')
+                        id:             ico.id,
+                        name:           ico.name,
+                        website:        ico.site,
+                        telegram:       telegram.replace("https://telegram.me/", "@").replace("https://t.me/", "@").replace("http://t.me/", "@").replace(/\/$/, ''),
+                        bitcointalk:    btctalk.replace("https://bitcointalk.org/index.php?topic=","").replace(/\/$/, ''),
+                        twitter:        twitter.replace("https://twitter.com/","").replace(/\/$/, ''),
+                        facebook:       facebook.replace("https://www.facebook.com/","").replace(/\/$/, ''),
+                        reddit:         reddit.replace("https://www.reddit.com/r/","").replace("https://www.reddit.com/user/","").replace(/\/$/, ''),
+                        medium:         medium.replace("https://medium.com/","@").replace("@@","@").replace(/\/$/, ''),
+                        // admin_score:    ico.getDataValue('admin_score'),
+                        // updated_at:     ico.getDataValue('updated_at'),
+                        // created_at:     ico.getDataValue('created_at')
                     }
                 );
 
@@ -87,27 +111,26 @@ let getNotFinishedIcos_ = function () {
  * @private
  */
 let insertScoreToDB_ = function (score) {
-    return models.icos_scores.findOne({
-        where: {ico_id: score.ico_id},
-        order: [["created_at", 'DESC']]
-    })
-        .then(oldscore => {
-
-            for (let field in score) {
-                if (score[field] === null || isNaN(score[field])) {
-                    score[field] = -2;
-                }
-
-                if (oldscore !== null) {
-                    if ((score[field] === -1 || score[field] === -2) && !(oldscore.getDataValue(field) === -1 || oldscore.getDataValue(field) === -2)) {
-                        score[field] = oldscore.getDataValue(field);
-                    }
-                }
-            }
-
+    // return models.icos_scores.findOne({
+    //     where: {ico_id: score.ico_id},
+    //     order: [["created_at", 'DESC']]
+    // })
+    //     .then(oldscore => {
+    //
+    //         for (let field in score) {
+    //             if (score[field] === null || isNaN(score[field])) {
+    //                 score[field] = -2;
+    //             }
+    //
+    //             if (oldscore !== null) {
+    //                 if ((score[field] === -1 || score[field] === -2) && !(oldscore.getDataValue(field) === -1 || oldscore.getDataValue(field) === -2)) {
+    //                     score[field] = oldscore.getDataValue(field);
+    //                 }
+    //             }
+    //         }
+            score.mentions = !isNaN(score.mentions) ? score.mentions : -2;
             return models.icos_scores.create(score);
 
-        });
 };
 
 
