@@ -11,6 +11,10 @@ const client = awis({
 let countRank_ = function(ico){
 
     return new Promise(function(resolve, reject) {
+
+        if(ico === '' || ico == null){
+            resolve( -1 );
+        }
         client({
             'Action': 'UrlInfo',
             'Url': url.parse(ico).hostname,
