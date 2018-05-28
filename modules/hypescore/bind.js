@@ -6,6 +6,8 @@ module.exports = (string, website) => {
     if (string === "" || string === null || string === undefined) {
         return -1;
     }
+
+    string = 'ico'+string;
     let tokenString = /\((.*)\)/;
     let domainString = /\.(\w*)\s/;
     string = string.replace(tokenString,'').replace(domainString,'').replace(/\s/,'');
