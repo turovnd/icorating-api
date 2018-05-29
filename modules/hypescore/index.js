@@ -173,9 +173,20 @@ let updateIcoScores_ = async function () {
 
     logger.info("started '", icos.length, "' icos")
     if (icos.length > 0) {
-        for (let i in icos) {
-            await update_(icos[i]);
 
+
+
+        for (let i in icos) {
+
+            console.time(icos[i].name)
+            var result = await update_(icos[i]);
+            console.timeEnd(icos[i].name)
+
+            logger.info(icos[i].name,"  iteration ", i, ", results: telegram: ",
+                result.telegram, ", bitcointalk: ", result.bitcointalk, ", twitter: ",
+                result.twitter, ", facebook: ", result.facebook, ", reddit: ", result.reddit,
+                ", medium: ", result.medium, ", bing: ", result.bing, ", visits: ",result.total_visits,
+                ", alexa: ",result.alexa_rank)
         }
 
     }
