@@ -54,7 +54,12 @@ let countFollowers_ = function (pageName) {
             });
         })
         .then(data => {
-            return data.fan_count
+            if (data.fan_count){
+                return data.fan_count
+            }else{
+                return -3
+            }
+
         })
         .catch(err => {
             logger.error("Facebook: error occur on getting fan count: `" + pageName + "`. " + err.message);

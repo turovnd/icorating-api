@@ -86,3 +86,5 @@ npm run prod:<module>:<option>
     Medium
         -4 - статус пользователя blacklisted
         -5 - статус пользователя deactivated/deleted
+    Facebook
+        -3 - нет данных о количестве подписчиков
