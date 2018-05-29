@@ -175,8 +175,8 @@ let updateIcoScores_ = async function () {
     logger.info("started '", icos.length, "' icos")
     if (icos.length > 0) {
         for (let i in icos) {
-            await update_(icos[i]);
-
+           var s = await update_(icos[i]);
+            console.log(s.bing)
         }
 
     }
