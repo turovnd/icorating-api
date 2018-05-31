@@ -1,43 +1,112 @@
 'use strict';
 const models    = require('../../models');
+const consts    = require('../../models/constants');
 const { Op } = require('sequelize')
 const moment = require('moment')
 const logger = require('../logger')()
+var slack = require('slack-notify')(process.env.SLACK_NOTIFY);
+var request = require("request");
+var querystring = require("querystring");
+var escapeJSON = require('escape-json-node');
+
+const crazyShit = {
+    telegram:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+    bitcointalk:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+    twitter:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+    facebook:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+    reddit:{ contentError:0,  serverError:0, parsed:0, customError:0, _averageTime:0 },
+    medium:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+    bing:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+    alexa_rank:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 }
+}
+
+
+let isQualifiedStatNumber = function(crazyKey, crazyValue) {
+    if( (typeof crazyKey === "object" && crazyKey !== null &&
+        crazyKey.hasOwnProperty(crazyValue)
+        && isObject(crazyKey[crazyValue])
+        && crazyKey[crazyValue].hasOwnProperty('parsed')
+        && crazyKey[crazyValue].hasOwnProperty('contentError')
+        && crazyKey[crazyValue].hasOwnProperty('serverError')
+        && crazyKey[crazyValue].hasOwnProperty('customError'))){
+        return true
+    }else{
+        return false
+    }
+}
+let composeStatsNotifyJson = function (chunkedStats,args) {
+    var fieldsArr = [];
+    for (let prop in chunkedStats) {
+        if (isQualifiedStatNumber(chunkedStats, prop)) {
+            fieldsArr.push({
+                "title": prop,
+                "value": chunkedStats[prop].parsed +" "
+                + chunkedStats[prop].contentError +" "
+                + chunkedStats[prop].serverError +" "
+                + chunkedStats[prop].customError + "\n",
+                // + chunkedStats[prop]._averageTime + " s.",
+                "short": true,
+                "thumb_url":"/assets/media/"+prop+".png"
+            })
+
+        }
+    }
+    let layout = {
+        "attachments": [
+            {
+                "fields": fieldsArr,
+                "color": "#F35A00",
+                "fallback": args?args:'',
+                // "pretext": "Optional text that appears above the attachment block",
+                // "author_name": "Bobby Tables",
+                // "author_link": "http://flickr.com/bobby/",
+                "author_icon": "http://flickr.com/icons/bobby.jpg",
+                // "title": "Slack API Documentation",
+                // "title_link": "https://api.slack.com/",
+                // "text": "more stats",
+
+                // "image_url": "http://my-website.com/path/to/image.jpg",
+                // "thumb_url": "http://example.com/path/to/thumb.png",
+                "footer": "for %d period of time",
+                "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+                "ts": 123456789
+            }
+        ]
+    };
+
+
+
+
+    return layout
+
+
+}
+
+let sendSlackNotifyEvent_ = function(text, args) {
+
+
+    var opts =  { method: 'POST',
+        url: process.env.SLACK_NOTIFY,
+        headers:
+            {   'cache-control': 'no-cache',
+                'content-type': 'application/json'
+            },
+        json: composeStatsNotifyJson(text,args)
+
+    };
+    request(opts, function (error, response, body) {
+        if (error) { return error }
+
+        return body;
+    });
+}
+
 /**
- * Get all ICOs from DB
+ * Utility function to check for object
  * @private
  */
-let getAllIcos_ = function () {
-
-    return models.icos.findAll({
-        order: [["created_at", 'DESC']]
-    })
-        .then(allicos => {
-
-            return allicos.map(ico => {
-
-                return Object.assign(
-                    {},
-                    {
-                        id:             ico.getDataValue('id'),
-                        name:           ico.getDataValue('name'),
-                        website:        ico.getDataValue('website'),
-                        telegram:       ico.getDataValue('telegram'),
-                        bitcointalk:    ico.getDataValue('bitcointalk'),
-                        twitter:        ico.getDataValue('twitter'),
-                        facebook:       ico.getDataValue('facebook'),
-                        reddit:         ico.getDataValue('reddit'),
-                        medium:         ico.getDataValue('medium'),
-                        admin_score:    ico.getDataValue('admin_score'),
-                        updated_at:     ico.getDataValue('updated_at'),
-                        created_at:     ico.getDataValue('created_at')
-                    }
-                );
-
-            });
-
-        });
-
+let isObject = function(a) {
+    return (!!a) && (a.constructor === Object);
 };
 /**
  * Get Not Finished YET ICOs from DB
@@ -58,19 +127,19 @@ let getNotFinishedIcos_ = function () {
             operatorsAliases: false
         }
     );
-    // return models.icos.findAll({
-    //     where:{
-    //         "end_date": {
-    //             [Op.gte]: moment().subtract(1, 'days').toDate()
-    //         }},
-    //     order: [["created_at", 'DESC']]
-    //     , logging: console.log}
-    // )
-    return sequelize.query(`SELECT ico_descriptions.ico_id as id, ico_crowdsales.end_date_ico, ico_descriptions.name, ico_links.site, ico_links.btctalk, ico_links.linkedin, ico_links.twitter, ico_links.facebook, ico_links.instagram, ico_links.telegram, ico_links.blog, ico_links.email, ico_links.youtube, ico_links.steemit, ico_links.reddit, ico_links.medium, ico_links.github, ico_links.slack, ico_links.google_market, ico_links.apple_store
+    return sequelize.query(
+        `SELECT ico_descriptions.ico_id as id, ico_crowdsales.end_date_ico, 
+        ico_descriptions.name, ico_links.site, ico_links.btctalk, ico_links.linkedin, 
+        ico_links.twitter, ico_links.facebook, ico_links.instagram, ico_links.telegram, 
+        ico_links.blog, ico_links.email, ico_links.youtube, ico_links.steemit, ico_links.reddit, 
+        ico_links.medium, ico_links.github, ico_links.slack, ico_links.google_market, ico_links.apple_store
     FROM ico_descriptions
     INNER JOIN ico_crowdsales on ico_descriptions.ico_id = ico_crowdsales.ico_id
-    INNER JOIN ico_links on ico_descriptions.ico_id = ico_links.ico_id where ico_crowdsales.end_date_ico >= CURDATE()`)
-        .then(allicos => {
+    INNER JOIN ico_links on ico_descriptions.ico_id = ico_links.ico_id 
+    where ico_crowdsales.end_date_ico >= CURDATE() limit 10`
+    ).then(allicos => {
+
+        if (allicos.length > 0) {
             return allicos[0].map(ico => {
 
                 var telegram = ico.telegram ? ico.telegram : '',
@@ -93,16 +162,11 @@ let getNotFinishedIcos_ = function () {
                         facebook:       facebook.replace("https://www.facebook.com/","").replace(/\/$/, ''),
                         reddit:         reddit.replace("https://www.reddit.com/r/","").replace("https://www.reddit.com/user/","").replace(/\/$/, ''),
                         medium:         medium.replace("https://medium.com/","@").replace("@@","@").replace(/\/$/, ''),
-                        // admin_score:    ico.getDataValue('admin_score'),
-                        // updated_at:     ico.getDataValue('updated_at'),
-                        // created_at:     ico.getDataValue('created_at')
                     }
                 );
-
             });
-
-        });
-
+        }
+  });
 };
 
 /**
@@ -111,25 +175,8 @@ let getNotFinishedIcos_ = function () {
  * @private
  */
 let insertScoreToDB_ = function (score) {
-    // return models.icos_scores.findOne({
-    //     where: {ico_id: score.ico_id},
-    //     order: [["created_at", 'DESC']]
-    // })
-    //     .then(oldscore => {
-    //
-    //         for (let field in score) {
-    //             if (score[field] === null || isNaN(score[field])) {
-    //                 score[field] = -2;
-    //             }
-    //
-    //             if (oldscore !== null) {
-    //                 if ((score[field] === -1 || score[field] === -2) && !(oldscore.getDataValue(field) === -1 || oldscore.getDataValue(field) === -2)) {
-    //                     score[field] = oldscore.getDataValue(field);
-    //                 }
-    //             }
-    //         }
-            score.mentions = !isNaN(score.mentions) ? score.mentions : -2;
-            return models.icos_scores.create(score);
+    score.mentions = !isNaN(score.mentions) ? score.mentions : -2;
+    return models.icos_scores.create(score);
 
 };
 
@@ -141,6 +188,7 @@ let insertScoreToDB_ = function (score) {
  * @private
  */
 let update_ = async function (ico) {
+
 
     let scores = {
         ico_id      : ico.id,
@@ -154,7 +202,6 @@ let update_ = async function (ico) {
         total_visits: await require('./total_visits')(ico.website),
         mentions    : await require('./mainrest')(ico.name),
         alexa_rank   : await require('./alexa').countRank(ico.website),
-        // month_alexa_rate : await require('./alexa').countMonthRates(ico.website),
         admin_score : 0,
         hype_score  : 0,
         created_at: new Date()
@@ -170,27 +217,76 @@ let update_ = async function (ico) {
  */
 let updateIcoScores_ = async function () {
     let icos = await getNotFinishedIcos_();
+    sendSlackNotifyEvent_("started '" + icos.length + "' icos","header");
+    var analyticsDTO = {
+        telegram:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+        bitcointalk:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+        twitter:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+        facebook:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+        reddit:{ contentError:0,  serverError:0, parsed:0, customError:0, _averageTime:0 },
+        medium:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+        bing:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+        alexa_rank:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 }
+    };
 
-    logger.info("started '", icos.length, "' icos")
     if (icos.length > 0) {
+        var avgChunkExecTime = [], countPidOperations = 0, countChunkStats = null;
+
+        for (let iterator in icos) {
+            let localTime = Date.now();
+            let icoStatsObj = await update_(icos[iterator]);
+            let timeSpent = (Date.now() - localTime) / 1000;
+            for (let _mediaSrc in icoStatsObj) {
+                if(icoStatsObj.hasOwnProperty(_mediaSrc) && analyticsDTO.hasOwnProperty(_mediaSrc)){
+                    icoStatsObj[_mediaSrc] =
+                        (!isNaN(parseFloat(icoStatsObj[_mediaSrc])) && isFinite(icoStatsObj[_mediaSrc]) &&
+                        icoStatsObj[_mediaSrc] > 0) ? icoStatsObj[_mediaSrc] : -5;
+
+                    switch (icoStatsObj[_mediaSrc]){
+                        case -1:
+                                analyticsDTO[_mediaSrc].contentError ++;
+                            break;
+                        case -2:
+                                analyticsDTO[_mediaSrc].serverError++;
+                            break;
+                        case -5:
+                            analyticsDTO[_mediaSrc].customError++;
+                            break;
+                        default:
+                                if (icoStatsObj[_mediaSrc] !== undefined && icoStatsObj[_mediaSrc] > 0 )
+                                analyticsDTO[_mediaSrc].parsed ++;
+                            break;
+                    }
+                    if(!countChunkStats || (countPidOperations % 5) == 0) {
+                        analyticsDTO[_mediaSrc]._averageTime = avgChunkExecTime.join('').length / avgChunkExecTime.length
+                    logger.info(analyticsDTO, "time",analyticsDTO[_mediaSrc]._averageTime)
+                    }
+                }
+            }
+            avgChunkExecTime.push(timeSpent);
+            countPidOperations++;
 
 
+            logger.info(countPidOperations );
+            if((countPidOperations % 5) == 0) {
+                console.log(countPidOperations + " .........")
+                countChunkStats = countPidOperations;
+                sendSlackNotifyEvent_(analyticsDTO)
+            }
 
-        for (let i in icos) {
-
-            console.time(icos[i].name)
-            var result = await update_(icos[i]);
-            console.timeEnd(icos[i].name)
-
-            logger.info(icos[i].name,"  iteration ", i, ", results: telegram: ",
-                result.telegram, ", bitcointalk: ", result.bitcointalk, ", twitter: ",
-                result.twitter, ", facebook: ", result.facebook, ", reddit: ", result.reddit,
-                ", medium: ", result.medium, ", bing: ", result.bing, ", visits: ",result.total_visits,
-                ", alexa: ",result.alexa_rank)
         }
+
+
+
+
+
+    }else{
+        slack.note('parser did not worked because of no ico in query result');
 
     }
 };
+
+
 
 
 /**
