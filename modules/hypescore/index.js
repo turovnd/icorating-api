@@ -6,108 +6,10 @@ const moment = require('moment')
 const logger = require('../logger')()
 var slack = require('slack-notify')(process.env.SLACK_NOTIFY);
 var request = require("request");
+var os = require("os");
 var querystring = require("querystring");
 var escapeJSON = require('escape-json-node');
 
-const crazyShit = {
-    telegram:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
-    bitcointalk:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
-    twitter:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
-    facebook:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
-    reddit:{ contentError:0,  serverError:0, parsed:0, customError:0, _averageTime:0 },
-    medium:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
-    bing:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
-    alexa_rank:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 }
-}
-
-
-let isQualifiedStatNumber = function(crazyKey, crazyValue) {
-    if( (typeof crazyKey === "object" && crazyKey !== null &&
-        crazyKey.hasOwnProperty(crazyValue)
-        && isObject(crazyKey[crazyValue])
-        && crazyKey[crazyValue].hasOwnProperty('parsed')
-        && crazyKey[crazyValue].hasOwnProperty('contentError')
-        && crazyKey[crazyValue].hasOwnProperty('serverError')
-        && crazyKey[crazyValue].hasOwnProperty('customError'))){
-        return true
-    }else{
-        return false
-    }
-}
-let composeStatsNotifyJson = function (chunkedStats,args) {
-    var fieldsArr = [];
-    for (let prop in chunkedStats) {
-        if (isQualifiedStatNumber(chunkedStats, prop)) {
-            fieldsArr.push({
-                "title": prop,
-                "value": chunkedStats[prop].parsed +" "
-                + chunkedStats[prop].contentError +" "
-                + chunkedStats[prop].serverError +" "
-                + chunkedStats[prop].customError + "\n",
-                // + chunkedStats[prop]._averageTime + " s.",
-                "short": true,
-                "thumb_url":"/assets/media/"+prop+".png"
-            })
-
-        }
-    }
-    let layout = {
-        "attachments": [
-            {
-                "fields": fieldsArr,
-                "color": "#F35A00",
-                "fallback": args?args:'',
-                // "pretext": "Optional text that appears above the attachment block",
-                // "author_name": "Bobby Tables",
-                // "author_link": "http://flickr.com/bobby/",
-                "author_icon": "http://flickr.com/icons/bobby.jpg",
-                // "title": "Slack API Documentation",
-                // "title_link": "https://api.slack.com/",
-                // "text": "more stats",
-
-                // "image_url": "http://my-website.com/path/to/image.jpg",
-                // "thumb_url": "http://example.com/path/to/thumb.png",
-                "footer": "for %d period of time",
-                "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
-                "ts": 123456789
-            }
-        ]
-    };
-
-
-
-
-    return layout
-
-
-}
-
-let sendSlackNotifyEvent_ = function(text, args) {
-
-
-    var opts =  { method: 'POST',
-        url: process.env.SLACK_NOTIFY,
-        headers:
-            {   'cache-control': 'no-cache',
-                'content-type': 'application/json'
-            },
-        json: composeStatsNotifyJson(text,args)
-
-    };
-    request(opts, function (error, response, body) {
-        if (error) { return error }
-
-        return body;
-    });
-}
-
-/**
- * Utility function to check for object
- * @private
- */
-let isObject = function(a) {
-    return (!!a) && (a.constructor === Object);
-};
 /**
  * Get Not Finished YET ICOs from DB
  * @private
@@ -136,7 +38,7 @@ let getNotFinishedIcos_ = function () {
     FROM ico_descriptions
     INNER JOIN ico_crowdsales on ico_descriptions.ico_id = ico_crowdsales.ico_id
     INNER JOIN ico_links on ico_descriptions.ico_id = ico_links.ico_id 
-    where ico_crowdsales.end_date_ico >= CURDATE() limit 10`
+    where ico_crowdsales.end_date_ico >= CURDATE()`
     ).then(allicos => {
 
         if (allicos.length > 0) {
@@ -166,7 +68,108 @@ let getNotFinishedIcos_ = function () {
                 );
             });
         }
-  });
+    });
+};
+
+
+const crazyShit = {
+    telegram:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+    bitcointalk:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+    twitter:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+    facebook:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+    reddit:{ contentError:0,  serverError:0, parsed:0, customError:0, _averageTime:0 },
+    medium:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+    bing:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
+    alexa_rank:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 }
+}
+let isQualifiedStatNumber = function(crazyKey, crazyValue) {
+    if( (typeof crazyKey === "object" && crazyKey !== null &&
+        crazyKey.hasOwnProperty(crazyValue)
+        && isObject(crazyKey[crazyValue])
+        && crazyKey[crazyValue].hasOwnProperty('parsed')
+        && crazyKey[crazyValue].hasOwnProperty('contentError')
+        && crazyKey[crazyValue].hasOwnProperty('serverError')
+        && crazyKey[crazyValue].hasOwnProperty('customError'))){
+        return true
+    }else{
+        return false
+    }
+}
+
+let renderStatsNotifyJson = function (chunkedStats,args,countString, color) {
+    var fieldsArr = [];
+    for (let prop in chunkedStats) {
+        if (isQualifiedStatNumber(chunkedStats, prop)) {
+            fieldsArr.push({
+                "title": prop,
+                "color":"#439FE0",
+                "value": chunkedStats[prop].parsed +" "
+                + chunkedStats[prop].contentError +" "
+                + chunkedStats[prop].serverError +" "
+                + chunkedStats[prop].customError + "\n",
+                // + chunkedStats[prop]._averageTime + " s.",
+                "short": true,
+                // "thumb_url":"/assets/media/"+prop+".png"
+            })
+
+        }
+    }
+    let layout = {
+        "attachments": [
+            {
+                "fields": fieldsArr,
+                "color": color,
+                "fallback": args?args:countString,
+                "title": !(countString === "header") ? countString : "",
+                // "author_name": args?args:"actual statistics",
+                // "author_link": "http://flickr.com/bobby/",
+                "author_icon": "http://flickr.com/icons/bobby.jpg",
+                // "title": "Slack API Documentation",
+                // "title_link": "https://api.slack.com/",
+                "text": "[0(parsed) 0(content error) 0(server error) 0(another error)]",
+
+                // "image_url": "http://my-website.com/path/to/image.jpg",
+                // "thumb_url": "http://example.com/path/to/thumb.png",
+                "footer": args?args:"avg time / 1 ico: "+Math.round(chunkedStats.telegram._averageTime) + " s" + " on: "+ os.hostname(),
+                "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+                "ts": + Math.floor(Date.now() / 1000)
+
+            }
+        ]
+    };
+
+
+
+
+    return layout
+
+
+}
+
+let sendSlackNotifyEvent_ = function(text, args, count, color) {
+
+
+    var opts =  { method: 'POST',
+        url: process.env.SLACK_NOTIFY,
+        headers:
+            {   'cache-control': 'no-cache',
+                'content-type': 'application/json'
+            },
+        json: renderStatsNotifyJson(text,args, count, color)
+
+    };
+    request(opts, function (error, response, body) {
+        if (error) { return error }
+
+        return body;
+    });
+}
+/**
+ * Utility function to check for object
+ * @private
+ */
+let isObject = function(a) {
+    return (!!a) && (a.constructor === Object);
 };
 
 /**
@@ -217,7 +220,7 @@ let update_ = async function (ico) {
  */
 let updateIcoScores_ = async function () {
     let icos = await getNotFinishedIcos_();
-    sendSlackNotifyEvent_("started '" + icos.length + "' icos","header");
+    sendSlackNotifyEvent_({},"start web crawling '" + icos.length + "' icos on. " + os.hostname(),"header", "#439FE0");
     var analyticsDTO = {
         telegram:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
         bitcointalk:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
@@ -238,9 +241,8 @@ let updateIcoScores_ = async function () {
             let timeSpent = (Date.now() - localTime) / 1000;
             for (let _mediaSrc in icoStatsObj) {
                 if(icoStatsObj.hasOwnProperty(_mediaSrc) && analyticsDTO.hasOwnProperty(_mediaSrc)){
-                    icoStatsObj[_mediaSrc] =
-                        (!isNaN(parseFloat(icoStatsObj[_mediaSrc])) && isFinite(icoStatsObj[_mediaSrc]) &&
-                        icoStatsObj[_mediaSrc] > 0) ? icoStatsObj[_mediaSrc] : -5;
+                    icoStatsObj[_mediaSrc] = (!isNaN(parseFloat(icoStatsObj[_mediaSrc]))
+                        && isFinite(icoStatsObj[_mediaSrc])) ? icoStatsObj[_mediaSrc] : -5;
 
                     switch (icoStatsObj[_mediaSrc]){
                         case -1:
@@ -259,7 +261,7 @@ let updateIcoScores_ = async function () {
                     }
                     if(!countChunkStats || (countPidOperations % 5) == 0) {
                         analyticsDTO[_mediaSrc]._averageTime = avgChunkExecTime.join('').length / avgChunkExecTime.length
-                    logger.info(analyticsDTO, "time",analyticsDTO[_mediaSrc]._averageTime)
+                    // logger.info(analyticsDTO, "time",analyticsDTO[_mediaSrc]._averageTime)
                     }
                 }
             }
@@ -271,7 +273,7 @@ let updateIcoScores_ = async function () {
             if((countPidOperations % 5) == 0) {
                 console.log(countPidOperations + " .........")
                 countChunkStats = countPidOperations;
-                sendSlackNotifyEvent_(analyticsDTO)
+                sendSlackNotifyEvent_(analyticsDTO, "", "currently processed: "+countPidOperations + " of: " + icos.length, "#e00032")
             }
 
         }
@@ -284,9 +286,27 @@ let updateIcoScores_ = async function () {
         slack.note('parser did not worked because of no ico in query result');
 
     }
+
 };
 
+let gracefullHandler = function(options, err){
 
+    console.log("gracefull shutdown");
+    sendSlackNotifyEvent_({},"stop web crawling icos on. " + os.hostname(),"header", "#439FE0");
+    // sendSlackNotifyEvent_({},"gracefull shutdown of web crawling operation","header", "#FF334B");
+
+    if (options.cleanup) {
+        console.log('clean')
+    }
+    if (err) {
+        console.log(err.stack);
+        console.log('err and clean')
+    }
+    if (options.exit) {
+        console.log('err and clean')
+        process.exit()
+    }
+}
 
 
 /**
@@ -307,8 +327,19 @@ let updateIcoScoresFromRequest_ = async function (ico) {
  * @private
  */
 let initHypeScore_ = async function () {
+    process.stdin.resume();
+    //do something when app is closing
+    process.on('exit', gracefullHandler.bind(null,{cleanup:true}));
+    process.on('SIGINT', gracefullHandler.bind(null, {exit:true}));
+    process.on('SIGUSR1', gracefullHandler.bind(null, {exit:true}));
+    process.on('SIGUSR2', gracefullHandler.bind(null, {exit:true}));
+    process.on('uncaughtException', gracefullHandler.bind(null, {exit:true}));
+
+
     await updateIcoScores_();
     setInterval(updateIcoScores_, 1000 * 60 * 60 * process.env.HYPESCORE_SCRAPER_TIME);
+
+
 };
 
 module.exports = {
