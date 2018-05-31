@@ -4,6 +4,8 @@ const consts    = require('../../models/constants');
 const { Op } = require('sequelize')
 const moment = require('moment')
 const logger = require('../logger')()
+
+const division = 100
 var slack = require('slack-notify')(process.env.SLACK_NOTIFY);
 var request = require("request");
 var os = require("os");
@@ -98,7 +100,9 @@ let isQualifiedStatNumber = function(crazyKey, crazyValue) {
 
 let renderStatsNotifyJson = function (chunkedStats,args,countString, color) {
     var fieldsArr = [];
+    var adoption = true;
     for (let prop in chunkedStats) {
+        adoption = false;
         if (isQualifiedStatNumber(chunkedStats, prop)) {
             fieldsArr.push({
                 "title": prop,
@@ -126,7 +130,7 @@ let renderStatsNotifyJson = function (chunkedStats,args,countString, color) {
                 "author_icon": "http://flickr.com/icons/bobby.jpg",
                 // "title": "Slack API Documentation",
                 // "title_link": "https://api.slack.com/",
-                "text": "[0(parsed) 0(content error) 0(server error) 0(another error)]",
+                "text": adoption ? "early adoption: [0(parsed) 0(content error) 0(server error) 0(another error)]" : "",
 
                 // "image_url": "http://my-website.com/path/to/image.jpg",
                 // "thumb_url": "http://example.com/path/to/thumb.png",
@@ -220,7 +224,7 @@ let update_ = async function (ico) {
  */
 let updateIcoScores_ = async function () {
     let icos = await getNotFinishedIcos_();
-    sendSlackNotifyEvent_({},"start web crawling '" + icos.length + "' icos on. " + os.hostname(),"header", "#439FE0");
+    sendSlackNotifyEvent_({},"start web crawling '" + icos.length + "' icos on. " + os.hostname() + " with ui division by "+division,"header", "#439FE0");
     var analyticsDTO = {
         telegram:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
         bitcointalk:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
@@ -259,7 +263,7 @@ let updateIcoScores_ = async function () {
                                 analyticsDTO[_mediaSrc].parsed ++;
                             break;
                     }
-                    if(!countChunkStats || (countPidOperations % 5) == 0) {
+                    if(!countChunkStats || (countPidOperations % division) == 0) {
                         analyticsDTO[_mediaSrc]._averageTime = avgChunkExecTime.join('').length / avgChunkExecTime.length
                     // logger.info(analyticsDTO, "time",analyticsDTO[_mediaSrc]._averageTime)
                     }
@@ -270,7 +274,7 @@ let updateIcoScores_ = async function () {
 
 
             logger.info(countPidOperations );
-            if((countPidOperations % 5) == 0) {
+            if((countPidOperations % division) == 0) {
                 console.log(countPidOperations + " .........")
                 countChunkStats = countPidOperations;
                 sendSlackNotifyEvent_(analyticsDTO, "", "currently processed: "+countPidOperations + " of: " + icos.length, "#e00032")
