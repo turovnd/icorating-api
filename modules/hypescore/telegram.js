@@ -1,6 +1,6 @@
 const logger   = require('../logger')();
 const telegram = require('telegram-bot-api');
-const timeout = ms => new Promise(res => setTimeout(res, ms))
+const timeout = ms => new Promise(res => setTimeout(res, ms));
 const telegramTokens =  process.env.TELEGRAM_TOKEN.split(' ');
 const perBotRequestLimit = 180;
 
@@ -24,7 +24,15 @@ function newApiInstance(){
     let instance = false;
     logger.info("New telegram api instance token: " + token);
     instance = new telegram({
-        token: token
+        token: token,
+        http_proxy: {
+            host: "u0k12.tgproxy.me",
+            port: 1080,
+            user: "telegram",
+            password: "telegram",
+            https: true
+
+        }
     });
     tokenIndex ++;
     if(telegramTokens[tokenIndex] == null){

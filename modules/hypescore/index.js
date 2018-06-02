@@ -214,7 +214,7 @@ let update_ = async function (ico) {
         hype_score  : 0,
         created_at: new Date()
     };
-    await insertScoreToDB_(scores);
+    var result = await insertScoreToDB_(scores);
 
     return scores;
 };
@@ -256,17 +256,17 @@ let updateIcoScores_ = async function () {
                         case -2:
                                 analyticsDTO[_mediaSrc].serverError++;
                             break;
-                        case -5:
-                            analyticsDTO[_mediaSrc].customError++;
-                            break;
                         default:
-                                if (icoStatsObj[_mediaSrc] !== undefined && icoStatsObj[_mediaSrc] > 0 )
-                                analyticsDTO[_mediaSrc].parsed ++;
+                            if (icoStatsObj[_mediaSrc] !== undefined && icoStatsObj[_mediaSrc] > 0 ) {
+                                    analyticsDTO[_mediaSrc].parsed++;
+                            }
+                            if (icoStatsObj[_mediaSrc] !== undefined && icoStatsObj[_mediaSrc] < 0 ) {
+                                analyticsDTO[_mediaSrc].customError++;
+                            }
                             break;
                     }
                     if(!countChunkStats || (countPidOperations % division) == 0) {
                         analyticsDTO[_mediaSrc]._averageTime = avgChunkExecTime.join('').length / avgChunkExecTime.length
-                    // logger.info(analyticsDTO, "time",analyticsDTO[_mediaSrc]._averageTime)
                     }
                 }
             }
