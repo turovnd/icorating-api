@@ -36,10 +36,12 @@ function newApiInstance(){
 let getChatMembersCount_ = function (chat_id) {
     requestCount++;
 
-    if (chat_id === "" || chat_id === null || chat_id === undefined)
+    if (chat_id === "" || chat_id === null || chat_id === undefined || chat_id.search(/joinchat/) !== -1)
         return -1;
     if (chat_id.search(/https:\/\/t.me\//) !== -1)
         chat_id = chat_id.split('https://t.me/')[1];
+
+    chat_id = chat_id.replace("https:www.t.me", "");
 
     if (chat_id.search(/@/) === -1)
         chat_id = "@" + chat_id;
@@ -54,10 +56,10 @@ let getChatMembersCount_ = function (chat_id) {
     }).catch(err => {
         logger.error("error with ", chat_id, " ",err)
         if(err.statusCode == 429){
-            return -2;
+            return -3;
             // if(retry < 2){
-            //     apiInstance = false;
-            //     getChatMembersCount_(chat_id);
+                // apiInstance = false;
+                // getChatMembersCount_(chat_id).then(data=>{});
             // }else{
             //     retry = 0;
             //     logger.error("Telegram: error "+err+"occur on getting chat members count: `" + chat_id + "`. " +  err.message);

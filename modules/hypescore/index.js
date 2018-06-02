@@ -46,7 +46,8 @@ let getNotFinishedIcos_ = function () {
         if (allicos.length > 0) {
             return allicos[0].map(ico => {
 
-                var telegram = ico.telegram ? ico.telegram : '',
+                var telegram = ico.telegram ?
+                    ico.telegram.replace("https://telegram.me/", "@").replace("https://t.me/", "@").replace("http://t.me/", "@").replace(/\/$/, '') : '',
                     btctalk = ico.btctalk ? ico.btctalk : '',
                     twitter = ico.twitter ? ico.twitter : '',
                     facebook = ico.facebook ? ico.facebook : '',
@@ -60,7 +61,7 @@ let getNotFinishedIcos_ = function () {
                         id:             ico.id,
                         name:           ico.name,
                         website:        ico.site,
-                        telegram:       telegram.replace("https://telegram.me/", "@").replace("https://t.me/", "@").replace("http://t.me/", "@").replace(/\/$/, ''),
+                        telegram:       telegram,
                         bitcointalk:    btctalk.replace("https://bitcointalk.org/index.php?topic=","").replace(/\/$/, ''),
                         twitter:        twitter.replace("https://twitter.com/","").replace(/\/$/, ''),
                         facebook:       facebook.replace("https://www.facebook.com/","").replace(/\/$/, ''),
