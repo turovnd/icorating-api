@@ -131,7 +131,7 @@ let renderStatsNotifyJson = function (chunkedStats,args,countString, color) {
                 "author_icon": "http://flickr.com/icons/bobby.jpg",
                 // "title": "Slack API Documentation",
                 // "title_link": "https://api.slack.com/",
-                "text": adoption ? "early adoption: [0(parsed) 0(content error) 0(server error) 0(another error)]" : "",
+                "text": adoption ? "[0(parsed) 0(content error) 0(server error) 0(another error)]" : "",
 
                 // "image_url": "http://my-website.com/path/to/image.jpg",
                 // "thumb_url": "http://example.com/path/to/thumb.png",
