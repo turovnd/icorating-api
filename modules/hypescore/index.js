@@ -247,9 +247,7 @@ let updateIcoScores_ = async function () {
         var avgChunkExecTime = [], countPidOperations = 0, countChunkStats = null;
 
         for (let iterator in icos) {
-            logger.info("wait")
             simpleWaitTransaction(2000);
-            logger.info("waited")
             let localTime = Date.now();
             let icoStatsObj = await update_(icos[iterator]);
             let timeSpent = (Date.now() - localTime) / 1000;
