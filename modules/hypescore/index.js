@@ -231,7 +231,7 @@ let update_ = async function (ico) {
  */
 let updateIcoScores_ = async function () {
     let icos = await getNotFinishedIcos_();
-    // sendSlackNotifyEvent_({},"start web crawling '" + icos.length + "' icos on. " + os.hostname() + " with ui division by "+division,"header", "#439FE0");
+    sendSlackNotifyEvent_({},"start web crawling '" + icos.length + "' icos on. " + os.hostname() + " with ui division by "+division,"header", "#439FE0");
     var analyticsDTO = {
         telegram:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
         bitcointalk:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },

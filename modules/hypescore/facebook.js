@@ -9,7 +9,7 @@ var simpleWaitTransaction = function (ms){
     while(end < start + ms) {
         end = new Date().getTime();
     }
-    console.log("waited 2s")
+    console.log("waited ", ms)
 }
 let countFollowers_ = function (pageName) {
     if (pageName === "" || pageName === null || pageName === undefined)
@@ -31,9 +31,11 @@ let countFollowers_ = function (pageName) {
         .replace("http:fb.me","");
 
     return new Promise((resolve, reject) => {
-        simpleWaitTransaction(2000)
+        simpleWaitTransaction(10000)
             facebook.api('/' + pageName + '/?fields=fan_count', (err, data) => {
                 if (err) {
+                    console.log(err.statusCode)
+                    console.log(err.message)
                     if (pageName.charAt(0) === "h"){
                         pageName = pageName.substr(1);
                     }
