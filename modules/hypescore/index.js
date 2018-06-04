@@ -187,7 +187,13 @@ let insertScoreToDB_ = function (score) {
     return models.icos_scores.create(score);
 
 };
-
+var simpleWaitTransaction = function (ms){
+    var start = new Date().getTime();
+    var end = start;
+    while(end < start + ms) {
+        end = new Date().getTime();
+    }
+}
 
 /**
  * Call functions for updating score
@@ -200,10 +206,10 @@ let update_ = async function (ico) {
 
     let scores = {
         ico_id      : ico.id,
+        facebook    : await require('./facebook').countFollowers(ico.facebook),
         telegram    : await require('./telegram').countChatMembers(ico.telegram),
         bitcointalk : await require('./bitcointalk').countFollowers(ico.bitcointalk),
         twitter     : await require('./twitter').countFollowers(ico.twitter),
-        facebook    : await require('./facebook').countFollowers(ico.facebook),
         reddit      : await require('./reddit').countFollowers(ico.reddit),
         medium      : await require('./medium').countFollowers(ico.medium),
         bing        : await require('./bind')(ico.name, ico.website),
@@ -241,6 +247,7 @@ let updateIcoScores_ = async function () {
         var avgChunkExecTime = [], countPidOperations = 0, countChunkStats = null;
 
         for (let iterator in icos) {
+            simpleWaitTransaction(2000);
             let localTime = Date.now();
             let icoStatsObj = await update_(icos[iterator]);
             let timeSpent = (Date.now() - localTime) / 1000;

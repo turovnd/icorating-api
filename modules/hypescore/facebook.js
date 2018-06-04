@@ -2,13 +2,6 @@ const logger   = require('../logger')();
 const Facebook = require('facebook-node-sdk');
 
 const facebook = new Facebook({ appId: process.env.FACEBOOK_APP_ID, secret: process.env.FACEBOOK_SECRET });
-let wait = function (ms){
-    var start = new Date().getTime();
-    var end = start;
-    while(end < start + ms) {
-        end = new Date().getTime();
-    }
-}
 let countFollowers_ = function (pageName) {
     if (pageName === "" || pageName === null || pageName === undefined)
         return -1;
@@ -28,7 +21,6 @@ let countFollowers_ = function (pageName) {
         .replace("https:m.facebook.com","")
         .replace("http:fb.me","");
 
-    wait(2000)
     return new Promise((resolve, reject) => {
             facebook.api('/' + pageName + '/?fields=fan_count', (err, data) => {
                 if (err) {
