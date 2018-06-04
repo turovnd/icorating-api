@@ -2,6 +2,13 @@ const logger   = require('../logger')();
 const Facebook = require('facebook-node-sdk');
 
 const facebook = new Facebook({ appId: process.env.FACEBOOK_APP_ID, secret: process.env.FACEBOOK_SECRET });
+var simpleWaitTransaction = function (ms){
+    var start = new Date().getTime();
+    var end = start;
+    while(end < start + ms) {
+        end = new Date().getTime();
+    }
+}
 let countFollowers_ = function (pageName) {
     if (pageName === "" || pageName === null || pageName === undefined)
         return -1;
@@ -27,11 +34,14 @@ let countFollowers_ = function (pageName) {
                     if (pageName.charAt(0) === "h"){
                         pageName = pageName.substr(1);
                     }
+                    simpleWaitTransaction(2000)
                     facebook.api('/' + pageName + '/?fields=fan_count', (err, data) => {
                         if(err) {
                             var pageNameArr = /-(\d+)/g.exec(pageName);
                             if (pageNameArr && pageNameArr.length > 0 ){
                                 pageName = pageNameArr[1];
+                                simpleWaitTransaction(2000)
+
                                 facebook.api('/' + pageName + '/?fields=fan_count', (err, data) => {
                                     if(err) {
                                         reject(err)
