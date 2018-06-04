@@ -31,7 +31,7 @@ let countFollowers_ = function (pageName) {
         .replace("http:fb.me","");
 
     return new Promise((resolve, reject) => {
-        simpleWaitTransaction(10000)
+        simpleWaitTransaction(5000)
             facebook.api('/' + pageName + '/?fields=fan_count', (err, data) => {
                 if (err) {
                     console.log(err.statusCode)
