@@ -119,7 +119,7 @@ function newApiInstance(){
 
    secret = secret.split(":")
 
-    // let instance = false;
+    let instance = false;
     logger.info("New facebook api instance secret: " + secret[1]);
 
     instance = new Facebook({ appId: secret[0], secret: secret[1] });
