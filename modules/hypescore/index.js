@@ -281,7 +281,7 @@ let updateIcoScores_ = async function () {
             countPidOperations++;
 
 
-            logger.info(countPidOperations );
+            // logger.info(countPidOperations );
             if((countPidOperations % division) == 0) {
                 console.log(countPidOperations + " .........")
                 countChunkStats = countPidOperations;
