@@ -251,6 +251,7 @@ let updateIcoScores_ = async function () {
             let localTime = Date.now();
             let icoStatsObj = await update_(icos[iterator]);
             let timeSpent = (Date.now() - localTime) / 1000;
+
             for (let _mediaSrc in icoStatsObj) {
                 if(icoStatsObj.hasOwnProperty(_mediaSrc) && analyticsDTO.hasOwnProperty(_mediaSrc)){
                     icoStatsObj[_mediaSrc] = (!isNaN(parseFloat(icoStatsObj[_mediaSrc]))
@@ -286,6 +287,7 @@ let updateIcoScores_ = async function () {
                 console.log(countPidOperations + " .........")
                 countChunkStats = countPidOperations;
                 sendSlackNotifyEvent_(analyticsDTO, "", "currently processed: "+countPidOperations + " of: " + icos.length, "#e00032")
+                simpleWaitTransaction(3000000);
             }
 
         }

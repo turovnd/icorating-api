@@ -107,6 +107,9 @@ String.prototype.replaceArray = function(find, replace) {
 function getApiInstance(){
     if(requestCount >= perBotRequestLimit ){
         requestCount = 0;
+        secretIndex ++;
+
+        logger.info("index")
         return  apiInstance = newApiInstance();
     }
     if(!apiInstance) apiInstance = newApiInstance();
@@ -114,19 +117,19 @@ function getApiInstance(){
 }
 
 function newApiInstance(){
-
+    if(facebookKeys[secretIndex] == null){
+        secretIndex = 0;
+    }
     var secret =  facebookKeys[secretIndex];
 
    secret = secret.split(":")
 
     let instance = false;
-    logger.info("New facebook api instance secret: " + secret[1]);
+    logger.info("New facebook api instance api: " + secret[0] + "secret: " + secret[1]);
 
     instance = new Facebook({ appId: secret[0], secret: secret[1] });
-    secretIndex ++;
-    if(facebookKeys[secretIndex] == null){
-        secretIndex = 0;
-    }
+
+
     return instance;
 }
 
