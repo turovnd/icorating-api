@@ -11,6 +11,7 @@ var request = require("request");
 var os = require("os");
 var querystring = require("querystring");
 var escapeJSON = require('escape-json-node');
+var _dayIterator = 7;
 
 /**
  * Get Not Finished YET ICOs from DB
@@ -212,10 +213,10 @@ let update_ = async function (ico) {
         twitter     : await require('./twitter').countFollowers(ico.twitter),
         reddit      : await require('./reddit').countFollowers(ico.reddit),
         medium      : await require('./medium').countFollowers(ico.medium),
-        bing        : await require('./bind')(ico.name, ico.website),
+        bing        : ((_dayIterator % 7)=== 0)? await require('./bind')(ico.name, ico.website) : -5,
         total_visits: await require('./total_visits')(ico.website),
         mentions    : await require('./mainrest')(ico.name),
-        alexa_rank   : await require('./alexa').countRank(ico.website),
+        alexa_rank   : ((_dayIterator % 7)=== 0)? await require('./alexa').countRank(ico.website) : -5,
         admin_score : 0,
         hype_score  : 0,
         created_at: new Date()
@@ -300,6 +301,7 @@ let updateIcoScores_ = async function () {
         slack.note('parser did not worked because of no ico in query result');
 
     }
+    _dayIterator ++;
 
 };
 
