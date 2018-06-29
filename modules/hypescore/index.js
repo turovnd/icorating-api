@@ -41,7 +41,7 @@ let getNotFinishedIcos_ = function () {
     FROM ico_descriptions
     INNER JOIN ico_crowdsales on ico_descriptions.ico_id = ico_crowdsales.ico_id
     INNER JOIN ico_links on ico_descriptions.ico_id = ico_links.ico_id 
-    where ico_crowdsales.end_date_ico >= CURDATE()`
+    where ico_crowdsales.end_date_ico >= CURDATE() OR ico_crowdsales.end_date_ico IS NULL`
     ).then(allicos => {
 
         if (allicos.length > 0) {
