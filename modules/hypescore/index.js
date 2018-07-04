@@ -32,6 +32,8 @@ let getNotFinishedIcos_ = function () {
             operatorsAliases: false
         }
     );
+
+
     return sequelize.query(
         `SELECT ico_descriptions.ico_id as id, ico_crowdsales.end_date_ico, 
         ico_descriptions.name, ico_links.site, ico_links.btctalk, ico_links.linkedin, 
@@ -41,7 +43,7 @@ let getNotFinishedIcos_ = function () {
     FROM ico_descriptions
     INNER JOIN ico_crowdsales on ico_descriptions.ico_id = ico_crowdsales.ico_id
     INNER JOIN ico_links on ico_descriptions.ico_id = ico_links.ico_id 
-    where ico_crowdsales.end_date_ico >= CURDATE() OR ico_crowdsales.end_date_ico IS NULL`
+    WHERE ico_crowdsales.end_date_ico IS NULL OR ico_crowdsales.end_date_ico >= CURDATE()`
     ).then(allicos => {
 
         if (allicos.length > 0) {
