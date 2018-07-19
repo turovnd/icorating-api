@@ -13,14 +13,9 @@ var querystring = require("querystring");
 var escapeJSON = require('escape-json-node');
 var _dayIterator = 7;
 
-/**
- * Get Not Finished YET ICOs from DB
- * @private
- */
-let getNotFinishedIcos_ = function () {
-
+let prodDbInstance = function(){
     const Sequelize = require("sequelize");
-    const sequelize = new Sequelize(
+    return new Sequelize(
         process.env.DB_PROD_DATABASE,
         process.env.DB_PROD_USER,
         process.env.DB_PROD_PASSWORD,
@@ -32,6 +27,43 @@ let getNotFinishedIcos_ = function () {
             operatorsAliases: false
         }
     );
+
+};
+
+/**
+ * Get Exchanges from DB
+ * @private
+ */
+let getExchanges_ = function () {
+    const sequelize = prodDbInstance();
+    return sequelize.query(
+        `SELECT a.id, a.name, a.url, b.url as twitter FROM exchanges a inner join socials b on a.id = b.socialable_id where b.social_type_id = 3  and b.socialable_type = 'exchange'`
+    ).then(exchanges => {
+        if (exchanges.length > 0) {
+            return exchanges[0].map(exchange => {
+                return Object.assign(
+                    {},
+                    {
+                        id:             exchange.id,
+                        name: exchange.name,
+                        url: exchange.url,
+                        twitter: exchange.twitter
+
+                    })
+            })
+        }
+    })
+
+
+};
+
+/**
+ * Get Not Finished YET ICOs from DB
+ * @private
+ */
+let getNotFinishedIcos_ = function () {
+
+    const sequelize = prodDbInstance();
 
 
     return sequelize.query(
@@ -102,9 +134,9 @@ let isQualifiedStatNumber = function(crazyKey, crazyValue) {
     }
 }
 
-let renderStatsNotifyJson = function (chunkedStats,args,countString, color) {
+let renderStatsNotifyJson = function (chunkedStats,args,countString, color, adoption = true) {
     var fieldsArr = [];
-    var adoption = true;
+
     for (let prop in chunkedStats) {
         adoption = false;
         if (isQualifiedStatNumber(chunkedStats, prop)) {
@@ -114,7 +146,7 @@ let renderStatsNotifyJson = function (chunkedStats,args,countString, color) {
                 "value": chunkedStats[prop].parsed +" "
                 + chunkedStats[prop].contentError +" "
                 + chunkedStats[prop].serverError +" "
-                + chunkedStats[prop].customError + "\n",
+                + chunkedStats[prop].customError +"\n",
                 // + chunkedStats[prop]._averageTime + " s.",
                 "short": true,
                 // "thumb_url":"/assets/media/"+prop+".png"
@@ -154,7 +186,7 @@ let renderStatsNotifyJson = function (chunkedStats,args,countString, color) {
 
 }
 
-let sendSlackNotifyEvent_ = function(text, args, count, color) {
+let sendSlackNotifyEvent_ = function(text, args, count, color, adoption = true) {
 
 
     var opts =  { method: 'POST',
@@ -163,7 +195,7 @@ let sendSlackNotifyEvent_ = function(text, args, count, color) {
             {   'cache-control': 'no-cache',
                 'content-type': 'application/json'
             },
-        json: renderStatsNotifyJson(text,args, count, color)
+        json: renderStatsNotifyJson(text,args, count, color,adoption)
 
     };
     request(opts, function (error, response, body) {
@@ -181,6 +213,24 @@ let isObject = function(a) {
 };
 
 /**
+ * Insert score to Table `exchange_ranks`
+ * @param exchange - Object
+ * @private
+ */
+let insertExchangeScoreToDB_ = function (exchange) {
+    const sequelize = prodDbInstance();
+
+    sequelize.query("update exchanges set alexa_rank = " + exchange.alexa_rank + ", twitter_followers = " + exchange.twitter_followers + " where id = " + exchange.exchange_id)
+        .spread((result,metadata) => {
+            return models.exchange_ranks.create(exchange);
+    })
+
+
+
+
+};
+
+/**
  * Insert score to Table `icos_scores`
  * @param score - Object
  * @private
@@ -190,21 +240,42 @@ let insertScoreToDB_ = function (score) {
     return models.icos_scores.create(score);
 
 };
+
+
 var simpleWaitTransaction = function (ms){
     var start = new Date().getTime();
     var end = start;
     while(end < start + ms) {
         end = new Date().getTime();
     }
-}
+};
+/**
+ * Call functions for updating exchange score
+ * @param exchange - Object
+ * @returns score - Object
+ * @private
+ */
+let updateExchange_ = async function (exchange) {
+
+
+    let scores = {
+        exchange_id      : exchange.id,
+        twitter_followers     : await require('./twitter').countFollowers(exchange.twitter),
+        alexa_rank  : await require('./alexa').countRank(exchange.url),
+        created_at: new Date()
+    };
+    var result = await insertExchangeScoreToDB_(scores);
+
+    return scores;
+};
 
 /**
- * Call functions for updating score
+ * Call functions for updating ico score
  * @param ico - Object
  * @returns score - Object
  * @private
  */
-let update_ = async function (ico) {
+let updateIco_ = async function (ico) {
 
 
     let scores = {
@@ -218,7 +289,7 @@ let update_ = async function (ico) {
         bing        : ((_dayIterator % 7)=== 0)? await require('./bind')(ico.name, ico.website) : -5,
         total_visits: await require('./total_visits')(ico.website),
         mentions    : await require('./mainrest')(ico.name),
-        alexa_rank   : ((_dayIterator % 7)=== 0)? await require('./alexa').countRank(ico.website) : -5,
+        alexa_rank  : ((_dayIterator % 7)=== 0)? await require('./alexa').countRank(ico.website) : -5,
         admin_score : 0,
         hype_score  : 0,
         created_at: new Date()
@@ -226,6 +297,32 @@ let update_ = async function (ico) {
     var result = await insertScoreToDB_(scores);
 
     return scores;
+};
+
+
+let updateExchangesScores_ = async function () {
+    let exchanges = await getExchanges_();
+    sendSlackNotifyEvent_({},"start web crawling '" + exchanges.length + "' exchanges on. " + os.hostname() + " with ui division by "+division,"header", "#e02a20", false);
+    let countPidOperations = 0,twitterNoResults = 0, alexaNoResults = 0;
+
+
+    for (let iterator in exchanges) {
+
+        let result = await updateExchange_(exchanges[iterator]);
+        if (result.alexa_rank < 0) alexaNoResults ++;
+        if (result.twitter_followers < 0) twitterNoResults ++;
+
+        countPidOperations++;
+        if((countPidOperations % division) == 0) {
+
+            sendSlackNotifyEvent_({},"exchanges with no alexa rating: " + alexaNoResults + "\n exchanges with no twitter followers count: " + twitterNoResults,"header", "#e02a20", false);
+
+        }
+
+
+    }
+
+
 };
 
 /**
@@ -252,7 +349,7 @@ let updateIcoScores_ = async function () {
         for (let iterator in icos) {
             simpleWaitTransaction(2000);
             let localTime = Date.now();
-            let icoStatsObj = await update_(icos[iterator]);
+            let icoStatsObj = await updateIco_(icos[iterator]);
             let timeSpent = (Date.now() - localTime) / 1000;
 
             for (let _mediaSrc in icoStatsObj) {
@@ -290,14 +387,10 @@ let updateIcoScores_ = async function () {
                 console.log(countPidOperations + " .........")
                 countChunkStats = countPidOperations;
                 sendSlackNotifyEvent_(analyticsDTO, "", "currently processed: "+countPidOperations + " of: " + icos.length, "#e00032")
-                simpleWaitTransaction(3000000);
+                simpleWaitTransaction(300000);
             }
 
         }
-
-
-
-
 
     }else{
         slack.note('parser did not worked because of no ico in query result');
@@ -334,7 +427,7 @@ let gracefullHandler = function(options, err){
  * @private
  */
 let updateIcoScoresFromRequest_ = async function (ico) {
-    ico.scores = await update_(ico);
+    ico.scores = await updateIco_(ico);
     delete ico.scores.ico_id;
     return ico;
 };
@@ -353,12 +446,22 @@ let initHypeScore_ = async function () {
     process.on('SIGUSR2', gracefullHandler.bind(null, {exit:true}));
     process.on('uncaughtException', gracefullHandler.bind(null, {exit:true}));
 
+    await updateScores_();
 
-    await updateIcoScores_();
-    setInterval(updateIcoScores_, 1000 * 60 * 60 * process.env.HYPESCORE_SCRAPER_TIME);
+    setInterval(updateScores_, 1000 * 60 * 60 * process.env.HYPESCORE_SCRAPER_TIME);
 
 
 };
+
+/**
+ * Scraping hype_score every 24 hours
+ * @private
+ */
+let updateScores_ = async function() {
+    await updateExchangesScores_();
+    await updateIcoScores_();
+};
+
 
 module.exports = {
     init            : initHypeScore_,
