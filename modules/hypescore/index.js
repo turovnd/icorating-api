@@ -257,11 +257,15 @@ var simpleWaitTransaction = function (ms){
  */
 let updateExchange_ = async function (exchange) {
 
+    let twitter = await require('./twitter').countFollowers(exchange.twitter)
+    let alexa = await require('./alexa').countRank(exchange.url)
+    twitter = (typeof twitter !== 'undefined') ? twitter : 0;
+    alexa = (typeof alexa !== 'undefined') ? alexa : 0;
 
     let scores = {
         exchange_id      : exchange.id,
-        twitter_followers     : await require('./twitter').countFollowers(exchange.twitter),
-        alexa_rank  : await require('./alexa').countRank(exchange.url),
+        twitter_followers     : twitter,
+        alexa_rank  : alexa,
         created_at: new Date()
     };
     var result = await insertExchangeScoreToDB_(scores);
