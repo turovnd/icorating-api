@@ -13,7 +13,7 @@ var querystring = require("querystring");
 var escapeJSON = require('escape-json-node');
 var _dayIterator = 7;
 
-let prodDbInstance = function(){
+let prodIcoratingInstance = function(){
     const Sequelize = require("sequelize");
     return new Sequelize(
         process.env.DB_PROD_DATABASE,
@@ -30,12 +30,29 @@ let prodDbInstance = function(){
 
 };
 
+let prodIcowalletInstance = function(){
+    const Sequelize = require("sequelize");
+    return new Sequelize(
+        process.env.DB_DATABASE,
+        process.env.DB_USER,
+        process.env.DB_PASSWORD,
+        {
+            host: process.env.DB_HOST,
+            dialect: 'mysql',
+            logging: false,
+            freezeTableName: true,
+            operatorsAliases: false
+        }
+    );
+
+};
+
 /**
  * Get Exchanges from DB
  * @private
  */
 let getExchanges_ = function () {
-    const sequelize = prodDbInstance();
+    const sequelize = prodIcowalletInstance();
     return sequelize.query(
         `SELECT a.id, a.name, a.url, b.url as twitter FROM exchanges a inner join socials b on a.id = b.socialable_id where b.social_type_id = 3  and b.socialable_type = 'exchange'`
     ).then(exchanges => {
@@ -63,19 +80,19 @@ let getExchanges_ = function () {
  */
 let getNotFinishedIcos_ = function () {
 
-    const sequelize = prodDbInstance();
+    const sequelize = prodIcoratingInstance();
 
 
     return sequelize.query(
-        `SELECT ico_descriptions.ico_id as id, ico_crowdsales.end_date_ico, 
+        `SELECT ico_descriptions.ico_id as id, ico_crowdsales.end_date_ico as end_date_ico, ico_crowdsales.start_date_ico as start_date_ico,
         ico_descriptions.name, ico_links.site, ico_links.btctalk, ico_links.linkedin, 
-        ico_links.twitter, ico_links.facebook, ico_links.instagram, ico_links.telegram, 
+        ico_links.twitter, ico_links.facebook, ico_links.instagram, ico_links.telegram, ico_links.youtube,
         ico_links.blog, ico_links.email, ico_links.youtube, ico_links.steemit, ico_links.reddit, 
         ico_links.medium, ico_links.github, ico_links.slack, ico_links.google_market, ico_links.apple_store
     FROM ico_descriptions
     INNER JOIN ico_crowdsales on ico_descriptions.ico_id = ico_crowdsales.ico_id
-    INNER JOIN ico_links on ico_descriptions.ico_id = ico_links.ico_id 
-    WHERE ico_crowdsales.end_date_ico IS NULL OR ico_crowdsales.end_date_ico >= CURDATE()`
+     INNER JOIN ico_links on ico_descriptions.ico_id = ico_links.ico_id 
+     WHERE ico_crowdsales.end_date_ico IS NULL OR ico_crowdsales.end_date_ico >= CURDATE()`
     ).then(allicos => {
 
         if (allicos.length > 0) {
@@ -96,6 +113,9 @@ let getNotFinishedIcos_ = function () {
                         id:             ico.id,
                         name:           ico.name,
                         website:        ico.site,
+                        youtube:        ico.youtube,
+                        start_date_ico: ico.start_date_ico,
+                        end_date_ico: ico.end_date_ico,
                         telegram:       telegram,
                         bitcointalk:    btctalk.replace("https://bitcointalk.org/index.php?topic=","").replace(/\/$/, ''),
                         twitter:        twitter.replace("https://twitter.com/","").replace(/\/$/, ''),
@@ -110,16 +130,6 @@ let getNotFinishedIcos_ = function () {
 };
 
 
-const crazyShit = {
-    telegram:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
-    bitcointalk:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
-    twitter:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
-    facebook:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
-    reddit:{ contentError:0,  serverError:0, parsed:0, customError:0, _averageTime:0 },
-    medium:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
-    bing:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 },
-    alexa_rank:{ contentError:0, serverError:0, parsed:0, customError:0, _averageTime:0 }
-}
 let isQualifiedStatNumber = function(crazyKey, crazyValue) {
     if( (typeof crazyKey === "object" && crazyKey !== null &&
         crazyKey.hasOwnProperty(crazyValue)
@@ -218,7 +228,7 @@ let isObject = function(a) {
  * @private
  */
 let insertExchangeScoreToDB_ = function (exchange) {
-    const sequelize = prodDbInstance();
+    const sequelize = prodIcowalletInstance();
 
     sequelize.query("update exchanges set alexa_rank = " + exchange.alexa_rank + ", twitter_followers = " + exchange.twitter_followers + " where id = " + exchange.exchange_id)
         .spread((result,metadata) => {
@@ -303,6 +313,11 @@ let updateIco_ = async function (ico) {
     return scores;
 };
 
+/**
+ *
+ * @returns {Promise<void>}
+ * @private
+ */
 
 let updateExchangesScores_ = async function () {
     let exchanges = await getExchanges_();
@@ -318,17 +333,136 @@ let updateExchangesScores_ = async function () {
 
         countPidOperations++;
         if((countPidOperations % division) == 0) {
-
             sendSlackNotifyEvent_({},"exchanges with no alexa rating: " + alexaNoResults + "\n exchanges with no twitter followers count: " + twitterNoResults,"header", "#e02a20", false);
+        }
+    }
+};
+
+let updateYoutubeScores_ = async function () {
+    return new Promise(async function(resolve, reject) {
+        let icos = await getNotFinishedIcos_();
+
+        sendSlackNotifyEvent_({}, "youtube analytics for '" + icos.length + "' on. " + os.hostname() + " with ui division by " + division, "header", "#e02a20", false);
+        let countPidOperations = 0, twitterNoResults = 0, alexaNoResults = 0;
+        let noIcos = [];
+
+
+        let filteredIcos = icos.filter(function (elem) {
+            if (typeof elem.youtube === "string" && elem.youtube.indexOf("channel") !== -1) {
+                return true
+            } else {
+                noIcos.push(elem);
+                return false
+            }
+        });
+
+        // var fs = require('fs');
+        // var stream = fs.createWriteStream("no_result.json");
+        // stream.once('open', function(fd) {
+        //     stream.write(JSON.stringify(noIcos));
+        //     stream.end();
+        // });
+
+        const regex = /.+channel\/(.+)\??\/?/gm;
+
+        for (let iterator in filteredIcos) {
+            let m;
+            while ((m = regex.exec(filteredIcos[iterator].youtube)) !== null) {
+                // This is necessary to avoid infinite loops with zero-width matches
+                if (m.index === regex.lastIndex) {
+                    regex.lastIndex++;
+                }
+                filteredIcos[iterator].youtube = m[1].replace("/", "").replace("?view_as=subscriber", "")
+            }
+        }
+
+
+        // let parsedResult = require("../../res.json")
+        try {
+
+            let scores = await require('./youtube').countFollowers(filteredIcos);
+
+            let resultYoutubeArr = [];
+            for (let i = 0; i < scores.length; i++) {
+                for (let a = 0; a < filteredIcos.length; a++) {
+                    if (scores[i].id === filteredIcos[a].youtube) {
+                        resultYoutubeArr.push(
+                            {
+                                id: scores[i].id,
+                                subscribers: scores[i].subscribers,
+                                views: scores[i].views,
+                                name: filteredIcos[a].name,
+                                website: filteredIcos[a].website,
+                                ico_id: filteredIcos[a].id,
+                                start_date: filteredIcos[a].start_date_ico,
+                                end_date: filteredIcos[a].end_date_ico,
+                            })
+                    }
+                }
+            }
+            let updatedYouTubeIcosScore = insertYoutubeScoreToDB_(resultYoutubeArr)
+            console.log(updatedYouTubeIcosScore)
+            resolve(updatedYouTubeIcosScore)
+            // var fs = require('fs');
+            // var stream = fs.createWriteStream("resultj.json");
+            // stream.once('open', function(fd) {
+            //     stream.write(JSON.stringify(scores));
+            //     stream.end();
+            // });
+
+        } catch (e) {
+            reject(e)
 
         }
 
 
-    }
+        // console.log(resultYoutubeArr.length,"results.....")
+        //
+        // fs.appendFileSync('good.json', '[');
+        //
+        //
+        //
+        //
+        // for(let i =0;i < resultYoutubeArr.length;i++){
+        //     fs.appendFileSync('good.json', JSON.stringify(resultYoutubeArr[i]) + ',');
+        // }
+        //
+        // fs.appendFileSync('good.json', ']');
 
 
+        // let updatedYouTubeIcosScore = insertYoutubeScoreToDB_(resultYoutubeArr)
+
+        // console.log(updatedYouTubeIcosScore)
+        // fs.writeFileSync('result_goods.json', JSON.stringify(resultYoutubeArr));
+
+        // var wstream = fs.createWriteStream('result_goods.json', {flags: 'a'});
+        // wstream.write(JSON.stringify(resultYoutubeArr));
+        // wstream.end();
+        // console.log(JSON.stringify(resultYoutubeArr))
+
+
+    })
 };
 
+/**
+ * Insert score to Table `exchange_ranks`
+ * @param exchange - Object
+ * @private
+ */
+let insertYoutubeScoreToDB_ = function (icos) {
+    const sequelize = prodIcowalletInstance();
+
+    for(let i = 0;i<icos.length;i++){
+
+
+        sequelize.query("update icos_scores set youtube_followers = " + icos[i].subscribers + ", youtube_views = " + icos[i].views + " where ico_id = " + icos[i].ico_id + " order by created_at desc limit 1")
+            .spread((result,metadata) => {
+                // console.log(i, icos[i].name,result)
+            })
+    }
+    return true
+
+};
 /**
  * Update ICOs Scores every day
  * @private
@@ -462,8 +596,10 @@ let initHypeScore_ = async function () {
  * @private
  */
 let updateScores_ = async function() {
+    await updateYoutubeScores_();
     await updateExchangesScores_();
     await updateIcoScores_();
+
 };
 
 
