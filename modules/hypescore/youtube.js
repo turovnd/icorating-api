@@ -101,7 +101,7 @@ async function channelsListById (links,client) {
         var loopArray = function(arr){
             return new Promise(async function(resolve, reject) {
                 getChannelsInfo(arr[x], async function (success, views = 0, subscribers = 0) {
-
+                        console.log(x,  arr[x], views)
 
                         let icoResult = {id: arr[x], views: views, subscribers: subscribers}
                         wholeResponce.push(icoResult);
