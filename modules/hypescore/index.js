@@ -381,6 +381,7 @@ let updateYoutubeScores_ = async function () {
         try {
 
             let scores = await require('./youtube').countFollowers(filteredIcos);
+            console.log(scores.length)
 
             let resultYoutubeArr = [];
             for (let i = 0; i < scores.length; i++) {
@@ -400,6 +401,7 @@ let updateYoutubeScores_ = async function () {
                     }
                 }
             }
+            console.log(resultYoutubeArr.length, "result arr")
             let updatedYouTubeIcosScore = insertYoutubeScoreToDB_(resultYoutubeArr)
             console.log(updatedYouTubeIcosScore)
             resolve(updatedYouTubeIcosScore)
