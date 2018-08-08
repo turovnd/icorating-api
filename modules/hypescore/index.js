@@ -52,7 +52,7 @@ let prodIcowalletInstance = function(){
  * @private
  */
 let getExchanges_ = function () {
-    const sequelize = prodIcowalletInstance();
+    const sequelize = prodIcoratingInstance();
     return sequelize.query(
         `SELECT a.id, a.name, a.url, b.url as twitter FROM exchanges a inner join socials b on a.id = b.socialable_id where b.social_type_id = 3  and b.socialable_type = 'exchange'`
     ).then(exchanges => {
@@ -228,7 +228,7 @@ let isObject = function(a) {
  * @private
  */
 let insertExchangeScoreToDB_ = function (exchange) {
-    const sequelize = prodIcowalletInstance();
+    const sequelize = prodIcoratingInstance();
 
     sequelize.query("update exchanges set alexa_rank = " + exchange.alexa_rank + ", twitter_followers = " + exchange.twitter_followers + " where id = " + exchange.exchange_id)
         .spread((result,metadata) => {
@@ -380,30 +380,28 @@ let updateYoutubeScores_ = async function () {
         // let parsedResult = require("../../res.json")
         try {
 
-            let scores = await require('./youtube').countFollowers(filteredIcos);
-            console.log(scores.length)
+            let resultYoutubeArr = await require('./youtube').countFollowers(filteredIcos);
 
-            let resultYoutubeArr = [];
-            for (let i = 0; i < scores.length; i++) {
-                for (let a = 0; a < filteredIcos.length; a++) {
-                    if (scores[i].id === filteredIcos[a].youtube) {
-                        resultYoutubeArr.push(
-                            {
-                                id: scores[i].id,
-                                subscribers: scores[i].subscribers,
-                                views: scores[i].views,
-                                name: filteredIcos[a].name,
-                                website: filteredIcos[a].website,
-                                ico_id: filteredIcos[a].id,
-                                start_date: filteredIcos[a].start_date_ico,
-                                end_date: filteredIcos[a].end_date_ico,
-                            })
-                    }
-                }
-            }
-            console.log(resultYoutubeArr.length, "result arr")
+            // let resultYoutubeArr = [];
+            // for (let i = 0; i < scores.length; i++) {
+            //     for (let a = 0; a < filteredIcos.length; a++) {
+            //         if (scores[i].id === filteredIcos[a].youtube) {
+            //             resultYoutubeArr.push(
+            //                 {
+            //                     id: scores[i].id,
+            //                     subscribers: scores[i].subscribers,
+            //                     views: scores[i].views,
+            //                     name: filteredIcos[a].name,
+            //                     website: filteredIcos[a].website,
+            //                     ico_id: filteredIcos[a].id,
+            //                     start_date: filteredIcos[a].start_date_ico,
+            //                     end_date: filteredIcos[a].end_date_ico,
+            //                 })
+            //         }
+            //     }
+            // }
+
             let updatedYouTubeIcosScore = insertYoutubeScoreToDB_(resultYoutubeArr)
-            console.log(updatedYouTubeIcosScore)
             resolve(updatedYouTubeIcosScore)
             // var fs = require('fs');
             // var stream = fs.createWriteStream("resultj.json");
