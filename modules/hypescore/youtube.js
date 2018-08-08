@@ -87,7 +87,7 @@ function channelsListById (links,client) {
             access_token: process.env.YOUTUBE_TOKEN,
             token_type: 'Bearer',
             scope: 'https://www.googleapis.com/auth/youtube',
-            expiry_date: 1533685581134
+            expiry_date: process.env.YOUTUBE_TIMESTAMP
         }
 
         const youtube = google.youtube({
