@@ -342,7 +342,8 @@ let updateYoutubeScores_ = async function () {
     return new Promise(async function(resolve, reject) {
         let icos = await getNotFinishedIcos_();
 
-        sendSlackNotifyEvent_({}, "youtube analytics for '" + icos.length + "' on. " + os.hostname() + " with ui division by " + division, "header", "#e02a20", false);
+
+        // sendSlackNotifyEvent_({}, "youtube analytics for '" + icos.length + "' on. " + os.hostname() + " with ui division by " + division, "header", "#e02a20", false);
         let countPidOperations = 0, twitterNoResults = 0, alexaNoResults = 0;
         let noIcos = [];
 
@@ -382,8 +383,10 @@ let updateYoutubeScores_ = async function () {
 
         // let parsedResult = require("../../res.json")
         try {
+            logger.info("update youtube ", filteredIcos.length)
 
             let resultYoutubeArr = await require('./youtube').countFollowers(filteredIcos);
+            logger.info("finished ", resultYoutubeArr)
 
             // let resultYoutubeArr = [];
             // for (let i = 0; i < scores.length; i++) {
@@ -404,8 +407,9 @@ let updateYoutubeScores_ = async function () {
             //     }
             // }
 
-            console.log("hello")
-            console.log(resultYoutubeArr.length)
+
+            logger.info("work");
+            logger.info(resultYoutubeArr.length);
 
             let updatedYouTubeIcosScore = insertYoutubeScoreToDB_(resultYoutubeArr)
             resolve(updatedYouTubeIcosScore)
@@ -584,10 +588,10 @@ let updateIcoScoresFromRequest_ = async function (ico) {
 let initHypeScore_ = async function () {
     process.stdin.resume();
     //do something when app is closing
-    process.on('exit', gracefullHandler.bind(null,{cleanup:true}));
-    process.on('SIGINT', gracefullHandler.bind(null, {exit:true}));
-    process.on('SIGUSR1', gracefullHandler.bind(null, {exit:true}));
-    process.on('SIGUSR2', gracefullHandler.bind(null, {exit:true}));
+    // process.on('exit', gracefullHandler.bind(null,{cleanup:true}));
+    // process.on('SIGINT', gracefullHandler.bind(null, {exit:true}));
+    // process.on('SIGUSR1', gracefullHandler.bind(null, {exit:true}));
+    // process.on('SIGUSR2', gracefullHandler.bind(null, {exit:true}));
     process.on('uncaughtException', gracefullHandler.bind(null, {exit:true}));
 
     await updateScores_();

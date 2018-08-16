@@ -6,6 +6,7 @@ const opn = require('opn');
 const destroyer = require('server-destroy');
 const fs = require('fs');
 const path = require('path');
+const logger = require('../logger')()
 
 // const keyPath = path.join(__dirname, 'client_secret.json');
 // let keys = { redirect_uris: [''] };
@@ -103,7 +104,11 @@ function channelsListById (links,client) {
                         let icoResult = {id: arr[x], views: views, subscribers: subscribers}
                         wholeResponce.push(icoResult);
 
-                        x++;
+                        logger.info(x)
+                        logger.info(arr[x])
+                        logger.info(views)
+
+                    x++;
                         if (x < arr.length) {
                             loopArray(arr, call)
                         } else {
@@ -163,9 +168,11 @@ let countFollowers_ = async function(filteredIcos){
             let scores = await channelsListById(filteredIcos)
 
             let resultYoutubeArr = [];
+            logger.info(scores.length)
             for (let i = 0; i < scores.length; i++) {
                 for (let a = 0; a < filteredIcos.length; a++) {
                     if (scores[i].id === filteredIcos[a].youtube) {
+
                         let score = {
                             id: scores[i].id,
                             subscribers: scores[i].subscribers,
@@ -176,7 +183,7 @@ let countFollowers_ = async function(filteredIcos){
                             start_date: filteredIcos[a].start_date_ico,
                             end_date: filteredIcos[a].end_date_ico,
                         }
-                        console.log(score)
+                        logger.info(i, score)
                         resultYoutubeArr.push(score)
                     }
                 }
