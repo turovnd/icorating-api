@@ -160,23 +160,24 @@ let countFollowers_ = async function(filteredIcos){
         try {
             // let client = await new SampleClient().authenticate(['https://www.googleapis.com/auth/youtube'])
 
-            let scores = await channelsListById(filteredIcos.slice(0,10))
+            let scores = await channelsListById(filteredIcos)
 
             let resultYoutubeArr = [];
             for (let i = 0; i < scores.length; i++) {
                 for (let a = 0; a < filteredIcos.length; a++) {
                     if (scores[i].id === filteredIcos[a].youtube) {
-                        resultYoutubeArr.push(
-                            {
-                                id: scores[i].id,
-                                subscribers: scores[i].subscribers,
-                                views: scores[i].views,
-                                name: filteredIcos[a].name,
-                                website: filteredIcos[a].website,
-                                ico_id: filteredIcos[a].id,
-                                start_date: filteredIcos[a].start_date_ico,
-                                end_date: filteredIcos[a].end_date_ico,
-                            })
+                        let score = {
+                            id: scores[i].id,
+                            subscribers: scores[i].subscribers,
+                            views: scores[i].views,
+                            name: filteredIcos[a].name,
+                            website: filteredIcos[a].website,
+                            ico_id: filteredIcos[a].id,
+                            start_date: filteredIcos[a].start_date_ico,
+                            end_date: filteredIcos[a].end_date_ico,
+                        }
+                        console.log(score)
+                        resultYoutubeArr.push(score)
                     }
                 }
             }

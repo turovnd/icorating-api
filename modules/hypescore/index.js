@@ -91,8 +91,8 @@ let getNotFinishedIcos_ = function () {
         ico_links.medium, ico_links.github, ico_links.slack, ico_links.google_market, ico_links.apple_store
     FROM ico_descriptions
     INNER JOIN ico_crowdsales on ico_descriptions.ico_id = ico_crowdsales.ico_id
-     INNER JOIN ico_links on ico_descriptions.ico_id = ico_links.ico_id 
-     WHERE ico_crowdsales.end_date_ico IS NULL OR ico_crowdsales.end_date_ico >= CURDATE()`
+     INNER JOIN ico_links on ico_descriptions.ico_id = ico_links.ico_id `
+     // WHERE ico_crowdsales.end_date_ico IS NULL OR ico_crowdsales.end_date_ico >= CURDATE()`
     ).then(allicos => {
 
         if (allicos.length > 0) {
@@ -356,12 +356,6 @@ let updateYoutubeScores_ = async function () {
             }
         });
 
-        // var fs = require('fs');
-        // var stream = fs.createWriteStream("no_result.json");
-        // stream.once('open', function(fd) {
-        //     stream.write(JSON.stringify(noIcos));
-        //     stream.end();
-        // });
 
         const regex = /.+channel\/(.+)\??\/?/gm;
 
@@ -372,9 +366,18 @@ let updateYoutubeScores_ = async function () {
                 if (m.index === regex.lastIndex) {
                     regex.lastIndex++;
                 }
+                if(m[1].indexOf("/") !== -1 || m[1].indexOf("?") !== -1) noIcos.push(filteredIcos[iterator])
                 filteredIcos[iterator].youtube = m[1].replace("/", "").replace("?view_as=subscriber", "")
             }
         }
+        // var fs = require('fs');
+        // var stream = fs.createWriteStream("no_result.json");
+        // stream.once('open', function(fd) {
+        //     stream.write(JSON.stringify(noIcos));
+        //     stream.end();
+        // });
+        //
+        // throw new Error("Sd")
 
 
         // let parsedResult = require("../../res.json")
@@ -400,6 +403,9 @@ let updateYoutubeScores_ = async function () {
             //         }
             //     }
             // }
+
+            console.log("hello")
+            console.log(resultYoutubeArr.length)
 
             let updatedYouTubeIcosScore = insertYoutubeScoreToDB_(resultYoutubeArr)
             resolve(updatedYouTubeIcosScore)
@@ -597,8 +603,8 @@ let initHypeScore_ = async function () {
  */
 let updateScores_ = async function() {
     await updateYoutubeScores_();
-    await updateExchangesScores_();
-    await updateIcoScores_();
+    // await updateExchangesScores_();
+    // await updateIcoScores_();
 
 };
 
