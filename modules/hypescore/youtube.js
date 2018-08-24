@@ -104,7 +104,7 @@ function channelsListById (links,client) {
                         let icoResult = {id: arr[x], views: views, subscribers: subscribers}
                         wholeResponce.push(icoResult);
 
-                        logger.info(x)
+                        // logger.info(x)
                         logger.info(arr[x])
                         logger.info(views)
 

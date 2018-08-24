@@ -607,8 +607,8 @@ let initHypeScore_ = async function () {
  */
 let updateScores_ = async function() {
     await updateYoutubeScores_();
-    // await updateExchangesScores_();
-    // await updateIcoScores_();
+    await updateExchangesScores_();
+    await updateIcoScores_();
 
 };
 
