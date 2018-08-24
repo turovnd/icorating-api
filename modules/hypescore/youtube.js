@@ -112,7 +112,8 @@ function channelsListById (links,client) {
                         if (x < arr.length) {
                             loopArray(arr, call)
                         } else {
-
+                            logger.info(wholeResponce)
+                            logger.info("finish")
                             call(wholeResponce)
 
                             // console.log("whole");
@@ -128,14 +129,20 @@ function channelsListById (links,client) {
         }
 
         var getChannelsInfo = function(ico, call, callback){
+
+            logger.info(ico, call, callback)
                 youtube.channels.list({
                     'id': ico,
                     'part': 'snippet,contentDetails,statistics'
                 }, function (err, response) {
 
+                    console.log(err, response.data)
 
+                    throw new Error()
+
+                    logger.info(response.data)
                     if (err || response.data.items.length === 0) {
-                        // if(err) console.log(err)
+                        if(err) logger.info(err)
                         callback(call, false);
                         // reject(err)
                     } else {
@@ -150,6 +157,8 @@ function channelsListById (links,client) {
 
 
         loopArray(idd, function(data){
+
+
             resolve(data)
 
         })
@@ -162,37 +171,81 @@ function channelsListById (links,client) {
 
 let countFollowers_ = async function(filteredIcos){
     return new Promise(async function(resolve, reject) {
-        try {
+        // try {
             // let client = await new SampleClient().authenticate(['https://www.googleapis.com/auth/youtube'])
 
-            let scores = await channelsListById(filteredIcos)
+        // console.log(filteredIcos)
 
-            let resultYoutubeArr = [];
-            logger.info(scores.length)
-            for (let i = 0; i < scores.length; i++) {
-                for (let a = 0; a < filteredIcos.length; a++) {
-                    if (scores[i].id === filteredIcos[a].youtube) {
+        var auth = new google.auth.OAuth2(
+            process.env.YOUTUBE_CLIENT_ID,
+            process.env.YOUTUBE_CLIENT_SECRET,
+            process.env.YOUTUBE_CLIENT_REDIRECT_URI,
+        );
 
-                        let score = {
-                            id: scores[i].id,
-                            subscribers: scores[i].subscribers,
-                            views: scores[i].views,
-                            name: filteredIcos[a].name,
-                            website: filteredIcos[a].website,
-                            ico_id: filteredIcos[a].id,
-                            start_date: filteredIcos[a].start_date_ico,
-                            end_date: filteredIcos[a].end_date_ico,
-                        }
-                        logger.info(i, score)
-                        resultYoutubeArr.push(score)
-                    }
-                }
-            }
-            resolve(resultYoutubeArr)
 
-        }catch(e){
-            reject(e)
+        auth.credentials = {
+            access_token: process.env.YOUTUBE_TOKEN,
+            token_type: 'Bearer',
+            scope: 'https://www.googleapis.com/auth/youtube',
+            expiry_date: process.env.YOUTUBE_TIMESTAMP
         }
+
+        const youtube = google.youtube({
+            version: 'v3',
+            auth: auth
+        });
+
+
+            youtube.channels.list({
+                'id': filteredIcos[0].youtube,
+                'part': 'snippet,contentDetails,statistics'
+            }, function (err, response) {
+                logger.info(err)
+                logger.info(response)
+
+                if (err || response.data.items.length === 0) {
+                    if(err) logger.info(err)
+                    // callback(call, false);
+                    // reject(err)
+                } else {
+                    let views = response.data.items[0].statistics.viewCount,
+                        subscribers = response.data.items[0].statistics.subscriberCount
+                    // callback(call, true, views, subscribers);
+
+                }
+                // resolve (response.data);
+                throw new Error("Sdf!!!!")
+            });
+
+
+            // let scores = await channelsListById(filteredIcos)
+            //
+            // let resultYoutubeArr = [];
+            // logger.info(scores.length)
+            // for (let i = 0; i < scores.length; i++) {
+            //     for (let a = 0; a < filteredIcos.length; a++) {
+            //         if (scores[i].id === filteredIcos[a].youtube) {
+            //
+            //             let score = {
+            //                 id: scores[i].id,
+            //                 subscribers: scores[i].subscribers,
+            //                 views: scores[i].views,
+            //                 name: filteredIcos[a].name,
+            //                 website: filteredIcos[a].website,
+            //                 ico_id: filteredIcos[a].id,
+            //                 start_date: filteredIcos[a].start_date_ico,
+            //                 end_date: filteredIcos[a].end_date_ico,
+            //             }
+            //             logger.info(i, score)
+            //             resultYoutubeArr.push(score)
+            //         }
+            //     }
+            // }
+            // resolve(resultYoutubeArr)
+
+        // }catch(e){
+        //     reject(e)
+        // }
 
     })
 }

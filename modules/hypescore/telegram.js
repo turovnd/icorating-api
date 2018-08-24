@@ -42,7 +42,7 @@ function newApiInstance(){
 
 let getChatMembersCount_ = function (chat_id) {
     requestCount++;
-
+    console.log(chat_id)
     if (chat_id === "" || chat_id === null || chat_id === undefined || chat_id.search(/joinchat/) !== -1)
         return -1;
     if (chat_id.search(/https:\/\/t.me\//) !== -1)
@@ -54,6 +54,23 @@ let getChatMembersCount_ = function (chat_id) {
         chat_id = "@" + chat_id;
 
     chat_id = chat_id.replace(/\//g, '');
+
+    if(chat_id === "" || !chat_id) {
+        console.log(chat_id)
+        return -1
+    }
+
+    // getApiInstance().getChat({
+    //     chat_id: chat_id
+    // }).then(data => {
+    //     console.log(data)
+    // }).catch(err => {
+    //     console.log(err.message)
+    //
+    //
+    // })
+    //
+    // return -6
 
     return getApiInstance().getChatMembersCount({
         chat_id: chat_id

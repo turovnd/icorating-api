@@ -89,10 +89,10 @@ let getNotFinishedIcos_ = function () {
         ico_links.twitter, ico_links.facebook, ico_links.instagram, ico_links.telegram, ico_links.youtube,
         ico_links.blog, ico_links.email, ico_links.youtube, ico_links.steemit, ico_links.reddit, 
         ico_links.medium, ico_links.github, ico_links.slack, ico_links.google_market, ico_links.apple_store
-    FROM ico_descriptions
-    INNER JOIN ico_crowdsales on ico_descriptions.ico_id = ico_crowdsales.ico_id
-     INNER JOIN ico_links on ico_descriptions.ico_id = ico_links.ico_id `
-     // WHERE ico_crowdsales.end_date_ico IS NULL OR ico_crowdsales.end_date_ico >= CURDATE()`
+        FROM ico_descriptions
+        INNER JOIN ico_crowdsales on ico_descriptions.ico_id = ico_crowdsales.ico_id
+        INNER JOIN ico_links on ico_descriptions.ico_id = ico_links.ico_id `
+        // WHERE ico_crowdsales.end_date_ico IS NULL OR ico_crowdsales.end_date_ico >= CURDATE()`
     ).then(allicos => {
 
         if (allicos.length > 0) {
@@ -292,18 +292,20 @@ let updateExchange_ = async function (exchange) {
 let updateIco_ = async function (ico) {
 
 
+    let tg = await require('./telegram').countChatMembers(ico.telegram)
+console.log(ico.telegram, tg)
     let scores = {
         ico_id      : ico.id,
-        facebook    : await require('./facebook').countFollowers(ico.facebook),
-        telegram    : await require('./telegram').countChatMembers(ico.telegram),
-        bitcointalk : await require('./bitcointalk').countFollowers(ico.bitcointalk),
-        twitter     : await require('./twitter').countFollowers(ico.twitter),
-        reddit      : await require('./reddit').countFollowers(ico.reddit),
-        medium      : await require('./medium').countFollowers(ico.medium),
-        bing        : ((_dayIterator % 7)=== 0)? await require('./bind')(ico.name, ico.website) : -5,
-        total_visits: await require('./total_visits')(ico.website),
-        mentions    : await require('./mainrest')(ico.name),
-        alexa_rank  : ((_dayIterator % 7)=== 0)? await require('./alexa').countRank(ico.website) : -5,
+        facebook    : 0,
+        telegram    : tg,
+        bitcointalk : 0,
+        twitter     : 0,
+        reddit      : 0,
+        medium      : 0,
+        bing        : 0,
+        total_visits: 0,
+        mentions    : 0,
+        alexa_rank  : 0,
         admin_score : 0,
         hype_score  : 0,
         created_at: new Date()
@@ -409,7 +411,8 @@ let updateYoutubeScores_ = async function () {
 
 
             logger.info("work");
-            logger.info(resultYoutubeArr.length);
+            logger.info(resultYoutubeArr);
+            logger.info(typeof resultYoutubeArr);
 
             let updatedYouTubeIcosScore = insertYoutubeScoreToDB_(resultYoutubeArr)
             resolve(updatedYouTubeIcosScore)
@@ -606,9 +609,9 @@ let initHypeScore_ = async function () {
  * @private
  */
 let updateScores_ = async function() {
-    await updateYoutubeScores_();
+    // await updateYoutubeScores_();
     // await updateExchangesScores_();
-    // await updateIcoScores_();
+    await updateIcoScores_();
 
 };
 
